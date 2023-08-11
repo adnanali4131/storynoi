@@ -5,7 +5,7 @@ import Link from "next/link";
 const Header = () => {
   return (
     <nav className="flex items-center h-[100px]">
-      <div className="container mx-auto">
+      <div className="custom_container mx-auto">
         <div className="flex items-center justify-between">
           <div className="logo">
             <Image src={Logo} alt="logo" width={100} />

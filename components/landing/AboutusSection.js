@@ -4,8 +4,8 @@ const AboutusSection = () => {
   return (
     <section className="relative overflow-hidden aboutus-section bg-crayola-sky-blue">
       <div className="bg-overlay-net"></div>
-      <div className="relative z-10 py-14">
-        <div className="container py-5 mx-auto">
+      <div className="relative z-10 py-20">
+        <div className="custom_container  mx-auto">
           <div className="flex items-end justify-between">
             <div className="flex-1 image-content">
               <p className="text-xl font-normal">About Us</p>

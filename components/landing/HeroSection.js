@@ -9,8 +9,8 @@ import userIcon from "@/assets/landing/icon/user.svg";
 import overlay4 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-4.png";
 const HeroSection = () => {
   return (
-    <div className="py-14">
-      <div className="container mx-auto">
+    <div className="py-20">
+      <div className="custom_container mx-auto">
         <div className="flex justify-between">
           <div className="relative flex items-center flex-1 text-content">
             <Image
@@ -60,39 +60,41 @@ const HeroSection = () => {
             </div>
           </div>
           <div className="relative flex justify-end flex-1 image-content w-100">
-            <div className="absolute left-0 flex flex-col items-center gap-3 top-[50%] -translate-y-[50%] ">
-              <div className="flex items-center justify-center w-12 h-12 rotate-45 bg-white rounded-lg shadow-sm bot-icon">
-                <Image
-                  src={botIcon}
-                  alt="bot-icon"
-                  width={25}
-                  className="-rotate-45"
-                />
-              </div>
-              <div className="w-[2px] h-[35px] rounded-xl opacity-10 bg-black line-bar"></div>
-              <div className="p-4 bg-alice-blue rounded-2xl shadow-sm flex-col gap-4 chat-box w-[250px] flex justify-end items-end">
-                <div className="flex items-center gap-2  shadow-sm rounded-xl p-3 bg-crayola-sky-blue w-[100%]">
-                  <Image src={handIcon} width={15} alt="hand-icon" />
-                  <p className="text-xs">AI - “Hello! Share your Idea”</p>
+            <div className="relative w-[100%]">
+              <div className="absolute -right-10 flex flex-col items-center gap-3 top-[50%] -translate-y-[50%] ">
+                <div className="flex items-center justify-center w-12 h-12 rotate-45 bg-white rounded-lg shadow-sm bot-icon">
+                  <Image
+                    src={botIcon}
+                    alt="bot-icon"
+                    width={25}
+                    className="-rotate-45"
+                  />
                 </div>
-                <div className="flex items-start gap-2 p-3  rounded-xl bg-white shadow-sm w-[80%]">
-                  <Image src={userIcon} width={15} alt="hand-icon" />
-                  <p className="text-xs">
-                    User - “Ethan is afraid of the dark””
-                  </p>
+                <div className="w-[2px] h-[35px] rounded-xl opacity-10 bg-black line-bar"></div>
+                <div className="p-4 bg-alice-blue rounded-2xl shadow-sm flex-col gap-4 chat-box w-[250px] flex justify-end items-end">
+                  <div className="flex items-center gap-2  shadow-sm rounded-xl p-3 bg-crayola-sky-blue w-[100%]">
+                    <Image src={handIcon} width={15} alt="hand-icon" />
+                    <p className="text-xs">AI - “Hello! Share your Idea”</p>
+                  </div>
+                  <div className="flex items-start gap-2 p-3  rounded-xl bg-white shadow-sm w-[80%]">
+                    <Image src={userIcon} width={15} alt="hand-icon" />
+                    <p className="text-xs">
+                      User - “Ethan is afraid of the dark””
+                    </p>
+                  </div>
+                  <div className="flex items-center shadow-sm gap-2  rounded-xl p-3 bg-crayola-sky-blue w-[100%]">
+                    <p className="text-xs">Sure! - “Here is your story!</p>
+                  </div>
                 </div>
-                <div className="flex items-center shadow-sm gap-2  rounded-xl p-3 bg-crayola-sky-blue w-[100%]">
-                  <p className="text-xs">Sure! - “Here is your story!</p>
+                <div className="w-[2px] h-[35px] rounded-xl opacity-10 bg-black line-bar"></div>
+                <div className="flex items-center justify-center w-12 h-12 rotate-45 bg-white rounded-lg shadow-sm bot-icon">
+                  <Image
+                    src={downloadIcon}
+                    alt="bot-icon"
+                    width={25}
+                    className="-rotate-45"
+                  />
                 </div>
-              </div>
-              <div className="w-[2px] h-[35px] rounded-xl opacity-10 bg-black line-bar"></div>
-              <div className="flex items-center justify-center w-12 h-12 rotate-45 bg-white rounded-lg shadow-sm bot-icon">
-                <Image
-                  src={downloadIcon}
-                  alt="bot-icon"
-                  width={25}
-                  className="-rotate-45"
-                />
               </div>
             </div>
             <Image

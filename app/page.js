@@ -1,14 +1,17 @@
 import Image from "next/image";
 import "@/styles/landing/index.css";
-import HeroSection from "@/component/landing/HeroSection";
+import HeroSection from "@/components/landing/HeroSection";
 import overlay1 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-2.png";
 import overlay2 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay3 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-3.png";
 import overlay5 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-5.png";
 
-import Header from "@/component/layout/Header";
-import AboutusSection from "@/component/landing/AboutusSection";
-import AllNeedSection from "@/component/landing/AllNeedSection";
+import Header from "@/components/layout/Header";
+import AboutusSection from "@/components/landing/AboutusSection";
+import AllNeedSection from "@/components/landing/AllNeedSection";
+import WhyStoryNoi from "@/components/landing/WhyStoryNoi";
+import CreateEbook from "@/components/landing/CreateEbook";
+import Footer from "@/components/layout/Footer";
 export default function Home() {
   return (
     <div>
@@ -47,11 +50,19 @@ export default function Home() {
       {/* ABOUT US SECTION */}
       <AboutusSection />
       {/* ABOUT US SECTION */}
-      {/* ALL ONE NEED */}
+      {/* ALL ONE NEED SECTION */}
       <AllNeedSection />
-      {/* ALL ONE NEED */}
+      {/* ALL ONE NEED SECTION */}
 
-      {/*  */}
+      {/* WHY STORYNOI SECTION */}
+      <WhyStoryNoi />
+      {/* WHY STORYNOI SECTION */}
+      {/* CREATE EBOOK SECTION */}
+      <CreateEbook />
+      {/* CREATE EBOOK SECTION */}
+      {/* FOOTER SECTION */}
+      <Footer />
+      {/* FOOTER SECTION */}
     </div>
   );
 }

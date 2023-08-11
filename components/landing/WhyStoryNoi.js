@@ -33,7 +33,7 @@ const WhyStoryNoi = () => {
               <p className="text-xl font-normal">Why</p>
               <h2 className="text-[42px] font-extrabold">StoryNoi</h2>
               <div className="flex flex-col gap-5 mt-5">
-                <p className="leading-7 tex-sm">
+                <p className="leading-7 text-lg">
                   Create Stories About Anything You Can Imagine. Create & Share
                   Your Stories With Friends And Family Through Social Media.
                   Publish Your Stories Online Or Turn Your Stories Into Books.
@@ -41,39 +41,39 @@ const WhyStoryNoi = () => {
                   It's Easy To Use, Affordable, And Fun. So What Are You Waiting
                   For? Start Creating Your Own Stories Today!
                 </p>
-                <p className="leading-7 tex-sm font-semibold">
+                <p className="leading-7 text-lg font-semibold">
                   Here Are Some Additional Benefits Of Using Storynoi:
                 </p>
                 <ul className="flex items-start gap-5 flex-col">
                   <li className="flex items-start gap-4">
                     <Image src={check} alt="check-1" className="mt-2" />
-                    <p className="leading-7 tex-sm">
+                    <p className="leading-7 text-lg">
                       It's A Great Way To Relax And Have Fun.
                     </p>
                   </li>
                   <li className="flex items-start gap-4">
                     <Image src={check} alt="check-1" className="mt-2" />
-                    <p className="leading-7 tex-sm">
+                    <p className="leading-7 text-lg">
                       It's A Great Way To Express Your Creativity.
                     </p>
                   </li>
                   <li className="flex items-start gap-4">
                     <Image src={check} alt="check-1" className="mt-2" />
-                    <p className="leading-7 tex-sm">
+                    <p className="leading-7 text-lg">
                       It's A Great Way To Learn About Different Cultures And
                       Perspectives.
                     </p>
                   </li>
                   <li className="flex items-start gap-4">
                     <Image src={check} alt="check-1" className="mt-2" />
-                    <p className="leading-7 tex-sm">
+                    <p className="leading-7 text-lg">
                       It's A Great Way To Connect With Other People Who Love To
                       Create Stories.
                     </p>
                   </li>
                   <li className="flex items-start gap-4">
                     <Image src={check} alt="check-1" className="mt-2" />
-                    <p className="leading-7 tex-sm">
+                    <p className="leading-7 text-lg">
                       If You're Looking For A Way To Unleash Your Creativity,
                       Connect With Other People, Or Learn
                     </p>

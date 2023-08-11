@@ -21,6 +21,7 @@ module.exports = {
         "dark-orange-20": "#FF8E00CC",
         "dark-orange": "#FF8E00",
         "alice-blue": "#FDF7F2",
+        cultured: "#F6F6F6",
       },
       colors: {
         mustard: "#FEE051",

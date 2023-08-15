@@ -15,7 +15,7 @@ import Footer from "@/components/layout/Footer";
 export default function Home() {
   return (
     <div>
-      <section className="relative hero-section">
+      <section className="relative hero-section bg-mustard">
         <div className="bg-overlay-net"></div>
         <Image
           src={overlay1}

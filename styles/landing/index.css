@@ -1,8 +1,5 @@
 /* HERO SECTION  */
 .hero-section {
-  background-image: url("../../assets/landing/bg-overloay-hero-section-2.png");
-  background-position: center;
-  background-size: cover;
   overflow: hidden;
 }
 .hero-section .bg-overlay-net {

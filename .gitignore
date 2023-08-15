@@ -4,10 +4,6 @@
 /node_modules
 /.pnp
 .pnp.js
-db
-middleware
-signin
-signup
 # testing
 /coverage
 

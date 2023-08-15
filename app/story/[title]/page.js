@@ -1,10 +1,37 @@
+"use client";
+import { useEffect, useState } from "react";
+
 import Image from "next/image";
-import "@/styles/landing/index.css";
+import "@/styles/stories/index.css";
 import overlay1 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay2 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay4 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-5.png";
 import Header from "@/components/layout/Header";
-const page = () => {
+const page = ({ params }) => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    const createStory = async () => {
+      // const message = params.title;
+
+      const res = await (
+        await fetch("/api/ai", {
+          method: "POST",
+          body: JSON.stringify({
+            message: params.title,
+          }),
+        })
+      ).json();
+
+      if (res) {
+        setData([...res]);
+        setLoading(false);
+      }
+    };
+    createStory();
+  }, []);
   return (
     <div>
       <section className="relative hero-section h-[100vh] bg-mustard">
@@ -36,20 +63,20 @@ const page = () => {
               <div className="h-[100vh] flex flex-col z-20 w-full rounded-xl bg-cultured shadow-sm">
                 <div className="h-[80vh] py-10 px-5 ">
                   <div className="h-full overflow-auto px-5 py-2 content-container flex gap-9 flex-col">
-                    {[1].map((el) => (
-                      <div className="text-black p-10 bg-white rounded-xl shadow-sm flex flex-col gap-5">
-                        <h2 className="text-[24px] font-semibold">
-                          Mama Get New Skates: A Heartwarming Story About
-                          Parenthood
-                        </h2>
-                        <p className="leading-7 text-lg">
-                          reprehenderit in voluptate velit esse cillum dolore eu
-                          fugiat nulla pariatur. Excepteur sint occaecat
-                          cupidatat non proident, sunt in culpa qui officia
-                          deserunt mollit anim id est laborum.
-                        </p>
+                    {data.length > 0 &&
+                      data.map((el) => (
+                        <div className="text-black p-10 bg-white rounded-xl shadow-sm flex flex-col gap-5">
+                          <h2 className="text-[24px] font-semibold">
+                            {el.heading}
+                          </h2>
+                          <p className="leading-7 text-lg">{el.description}</p>
+                        </div>
+                      ))}
+                    {loading && (
+                      <div className="w-[100%] h-[100%] flex justify-center items-center">
+                        <div class="loader"></div>
                       </div>
-                    ))}
+                    )}
                     <div className="w-full h-[100px]"></div>
                   </div>
                 </div>

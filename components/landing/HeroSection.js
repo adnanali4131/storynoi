@@ -1,3 +1,6 @@
+"use client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Image from "next/image";
 import Star from "@/assets/landing/icon/star.svg";
 import overlay6 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-6.png";
@@ -8,6 +11,11 @@ import downloadIcon from "@/assets/landing/icon/download.svg";
 import userIcon from "@/assets/landing/icon/user.svg";
 import overlay4 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-4.png";
 const HeroSection = () => {
+  const router = useRouter();
+  const [storyTitle, setStoryTitle] = useState("");
+  const handleCreateStory = () => {
+    router.push(`/story/${storyTitle}`);
+  };
   return (
     <div className="py-20">
       <div className="custom_container mx-auto">
@@ -37,8 +45,15 @@ const HeroSection = () => {
                 <input
                   className="flex-1 p-3 text-xs rounded-lg outline-none"
                   placeholder="Share your idea to start the book creation"
+                  type="text"
+                  value={storyTitle}
+                  onChange={(e) => setStoryTitle(e.target.value)}
                 />
-                <button className="px-5 py-3 text-sm font-medium text-white rounded-lg bg-dark-orange">
+                <button
+                  type="button"
+                  onClick={handleCreateStory}
+                  className="px-5 py-3 text-sm font-medium outline-none text-white rounded-lg bg-dark-orange"
+                >
                   Create Story
                 </button>
               </div>

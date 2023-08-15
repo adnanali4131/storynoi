@@ -1,5 +1,5 @@
 const { Configuration, OpenAIApi } = require("openai");
-import { NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
 
 const config = new Configuration({
   apiKey: process.env.OPEN_AI_API_KEY,
@@ -22,19 +22,22 @@ export async function POST(req) {
           }
         ]
         You are a children's story writer. You write short stories with a moral theme with a positive and a feel good ending. The plot of the story is divided into specific heading. Please provide a story structure using the following headings: Plot, Inciting Incident, Rising Action, Dilemma, Climax, Denouement, and Moral. The stories must be at-least 400 words. All stories need to be positive and have a happy ending. Don't mention adult content, religion. Please keep stories kids friendly and imaginative as much as possible. Avoid use of words 'punish' or adults hitting kids. Reply in the following JSON formatted response: 
-        `
+        `,
       },
-      { role: "user", content: message }
+      { role: "user", content: message },
     ];
     const response = await openAi.createChatCompletion({
       model: "gpt-3.5-turbo",
       messages: prompt,
     });
 
-    const data = response.data.choices && response.data.choices[0] ? response.data.choices[0].message.content : "No response from OpenAI";
+    const data =
+      response.data.choices && response.data.choices[0]
+        ? response.data.choices[0].message.content
+        : "No response from OpenAI";
 
     return new NextResponse(data);
   } catch (error) {
     return NextResponse.json({ message: "Error occurred" });
   }
-};
+}

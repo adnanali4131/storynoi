@@ -9,28 +9,37 @@ import overlay4 from "@/assets/stories/creative-vibrant-grunge-watercolor-backgr
 import Header from "@/components/layout/Header";
 const page = ({ params }) => {
   const [data, setData] = useState([]);
+  const [conversation, setConversation] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const [changes, setChanges] = useState("");
+
+  const createStory = async (content) => {
+    setConversation((curr) => [...curr, { role: "user", content }]);
+
+    const res = await (
+      await fetch("/api/ai", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [...conversation, { role: "user", content }],
+        }),
+      })
+    ).json();
+    console.log(res);
+    if (res) {
+      setData([...res]);
+      setConversation((curr) => [
+        ...curr,
+        { role: "assistant", content: JSON.stringify(res) },
+      ]);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
-    const createStory = async () => {
-      // const message = params.title;
 
-      const res = await (
-        await fetch("/api/ai", {
-          method: "POST",
-          body: JSON.stringify({
-            message: params.title,
-          }),
-        })
-      ).json();
-
-      if (res) {
-        setData([...res]);
-        setLoading(false);
-      }
-    };
-    createStory();
+    createStory(params.title);
   }, []);
   return (
     <div>
@@ -86,7 +95,14 @@ const page = ({ params }) => {
               <div className="custom_container mx-auto w-[100%] h-[100%] flex  items-center">
                 <div className="px-14 w-[100%]">
                   <div className="bg-white p-2 w-[100%] rounded-lg flex gap-2 justify-between">
-                    <button className="bg-crayola-sky-blue rounded-lg flex-1 p-2 ">
+                    <input
+                      value={changes}
+                      onChange={(event) => setChanges(event.target.value)}
+                    />
+                    <button
+                      onClick={() => createStory(changes)}
+                      className="bg-crayola-sky-blue rounded-lg flex-1 p-2 "
+                    >
                       Prefer any changes
                     </button>
                     <button className="text-white text-sm flex-1 p-2 bg-dark-orange rounded-lg">

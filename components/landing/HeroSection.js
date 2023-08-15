@@ -18,7 +18,7 @@ const HeroSection = () => {
   };
   return (
     <div className="py-20">
-      <div className="custom_container mx-auto">
+      <div className="mx-auto custom_container">
         <div className="flex justify-between">
           <div className="relative flex items-center flex-1 text-content">
             <Image
@@ -36,7 +36,7 @@ const HeroSection = () => {
               />
               <h2 className="text-[42px] font-extrabold">
                 Let Gen - AI Turn Your Idea to a{" "}
-                <span className="text-dark-orange">kid’s Book!</span>{" "}
+                <span className="text-rose-pink">kid’s Book!</span>{" "}
               </h2>
               <p className="mt-10 text-xl font-normal">
                 Express your idea in a few words!
@@ -52,7 +52,7 @@ const HeroSection = () => {
                 <button
                   type="button"
                   onClick={handleCreateStory}
-                  className="px-5 py-3 text-sm font-medium outline-none text-white rounded-lg bg-dark-orange"
+                  className="px-5 py-3 text-sm font-medium text-white rounded-lg outline-none bg-rose-pink"
                 >
                   Create Story
                 </button>

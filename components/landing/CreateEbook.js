@@ -3,10 +3,10 @@ import kidEbook from "@/assets/landing/kid-ebook.svg";
 
 const CreateEbook = () => {
   return (
-    <section className="relative overflow-hidden create-ebook-section bg-bluebonnet text-white">
+    <section className="relative overflow-hidden text-black create-ebook-section bg-crayola-sky-blue">
       <div className="bg-overlay-net"></div>
-      <div className="relative py-20 z-10 ">
-        <div className="custom_container mx-auto">
+      <div className="relative z-10 py-20 ">
+        <div className="mx-auto custom_container">
           <div className="flex items-center justify-between">
             <div className="flex flex-col items-center justify-center flex-1">
               <h2 className="text-[42px] font-extrabold">

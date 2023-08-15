@@ -1,3 +1,4 @@
+"use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
@@ -51,7 +52,7 @@ const HeroSection = () => {
                 <button
                   type="button"
                   onClick={handleCreateStory}
-                  className="px-5 py-3 text-sm font-medium text-white rounded-lg bg-dark-orange"
+                  className="px-5 py-3 text-sm font-medium outline-none text-white rounded-lg bg-dark-orange"
                 >
                   Create Story
                 </button>

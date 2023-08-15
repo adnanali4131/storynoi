@@ -41,7 +41,7 @@ export async function POST(req) {
     return new NextResponse(data);
 
   } catch (error) {
-    // console.log(error)
+    console.log(error)
     return NextResponse.json({ message: error.message });
   }
 };

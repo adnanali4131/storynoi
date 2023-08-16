@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Image from "next/image";
 import "@/styles/stories/index.css";
@@ -7,15 +7,22 @@ import overlay1 from "@/assets/stories/creative-vibrant-grunge-watercolor-backgr
 import overlay2 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay4 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-5.png";
 import Header from "@/components/layout/Header";
-const page = ({ params }) => {
+import SendIcon from "@/assets/stories/icons/send.svg";
+import Lottie from "react-lottie";
+import * as animationData from "@/assets/stories/book-loader.json";
+import { SUMMARY } from "@/constants/index";
+import downloadImage from "@/assets/stories/download.svg";
+
+const Page = ({ params }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [loadingText, setLoadingText] = useState("");
+  const [prefChangesModal, setPrefChangesModal] = useState(false);
+  const [storyUpdates, setStoryUpdates] = useState("");
   useEffect(() => {
     setLoading(true);
+    setLoadingText("Gathering Fairy Tale for Stories... ✨📜");
     const createStory = async () => {
-      // const message = params.title;
-
       const res = await (
         await fetch("/api/ai", {
           method: "POST",
@@ -26,15 +33,79 @@ const page = ({ params }) => {
       ).json();
 
       if (res) {
-        setData([...res]);
+        setData(
+          res.map((el) => {
+            return {
+              heading: el.heading,
+              description: el.description,
+              image: "",
+              imageText: "No image generated yet!",
+            };
+          })
+        );
         setLoading(false);
       }
     };
     createStory();
   }, []);
+
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
+  const fetchImages = async (storyData) => {
+    setLoading(true);
+    setLoadingText("Assembling Words into Adventures... 🌟📖");
+    const stories = [...storyData];
+    const length = storyData?.length;
+    stories.forEach((story) => {
+      story.imageText = "Generating Pic...";
+    });
+    setData([...stories]);
+    // stories[i].imageText = "Generating Pic...";
+    for (let i = 0; i < length; i++) {
+      if (stories[i].heading !== SUMMARY) {
+        try {
+          setData([...stories]);
+          const res = await (
+            await fetch("/api/imageGenerate", {
+              method: "POST",
+              body: JSON.stringify({
+                summary: storyData.find((el) => el.heading === SUMMARY)
+                  .description,
+                description: stories[i].description,
+              }),
+            })
+          ).json();
+          if (res) {
+            const imageBuffer = Buffer.from(
+              res.images.artifacts[0].base64,
+              "base64"
+            );
+            const generateImageURL = URL.createObjectURL(
+              new Blob([imageBuffer])
+            );
+
+            stories[i].image = generateImageURL;
+            stories[i].imageText = "";
+            setData([...stories]);
+          }
+        } catch (err) {
+          stories[i].imageText = "Failed to generate pic";
+          setData([...stories]);
+        }
+      }
+    }
+    setLoading(false);
+  };
+
   return (
     <div>
-      <section className="relative hero-section h-[100vh] bg-mustard">
+      <section className="relative overflow-hidden hero-section h-[100vh] bg-mustard">
         <div className="bg-overlay-net"></div>
         <Image
           src={overlay1}
@@ -53,31 +124,76 @@ const page = ({ params }) => {
           src={overlay4}
           alt={"bg-overlay-1"}
           width={150}
-          className="absolute bottom-20 z-10 right-0 opacity-50"
+          className="absolute right-0 z-10 opacity-50 bottom-20"
         />
         <div className="relative z-10">
           <Header />
           {/* <HeroSection /> */}
-          <div className="relative">
-            <div className="custom_container mx-auto ">
-              <div className="h-[100vh] flex flex-col z-20 w-full rounded-xl bg-cultured shadow-sm">
-                <div className="h-[80vh] py-10 px-5 ">
-                  <div className="h-full overflow-auto px-5 py-2 content-container flex gap-9 flex-col">
+          <div className="relative overflow-hidden">
+            <div className="mx-auto custom_container ">
+              <div className="h-[100vh] w-[90%] mx-auto flex flex-col z-20  rounded-xl bg-cultured shadow-sm">
+                <div className="h-[80vh]  py-10 px-5 ">
+                  <div className="flex flex-col h-full px-5 py-2 overflow-auto content-container gap-9">
                     {data.length > 0 &&
-                      data.map((el) => (
-                        <div className="text-black p-10 bg-white rounded-xl shadow-sm flex flex-col gap-5">
-                          <h2 className="text-[24px] font-semibold">
-                            {el.heading}
-                          </h2>
-                          <p className="leading-7 text-lg">{el.description}</p>
-                        </div>
-                      ))}
-                    {loading && (
-                      <div className="w-[100%] h-[100%] flex justify-center items-center">
-                        <div class="loader"></div>
+                      data.map(
+                        (el) =>
+                          el.heading !== SUMMARY && (
+                            <>
+                              <div
+                                key={el.heading}
+                                className="flex items-center gap-5 text-black bg-white shadow-sm rounded-xl"
+                              >
+                                <div className="w-full flex-1 h-[500px] flex overflow-hidden  justify-center items-center flex-col shadow-sm">
+                                  {el.image ? (
+                                    <Image
+                                      src={el.image}
+                                      alt={el.heading}
+                                      width={100}
+                                      height={100}
+                                      className="w-[100%]"
+                                    />
+                                  ) : (
+                                    <div className="flex items-center justify-center gap-4 flex-col w-full h-[100%]">
+                                      <Image
+                                        src={downloadImage}
+                                        alt="download"
+                                      />
+                                      {el.imageText.length > 0 ? (
+                                        <p className="text-lg leading-7 text-center ">
+                                          {el.imageText}
+                                        </p>
+                                      ) : null}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="h-[500px] items-center p-4 flex justify-center flex-col">
+                                    <h2 className="text-[24px] font-semibold">
+                                      {el.heading}
+                                    </h2>
+                                    <p className="text-lg leading-7 text-center">
+                                      {el.description}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          )
+                      )}
+                    {loading && !data.length && (
+                      <div className="flex flex-col w-full h-[100%]">
+                        <Lottie
+                          options={defaultOptions}
+                          isPaused={false}
+                          isStopped={false}
+                          width={400}
+                        />
+                        <p className="-mt-[150px] text-lg leading-7 text-center">
+                          {loadingText}
+                        </p>
                       </div>
                     )}
-                    <div className="w-full h-[100px]"></div>
+                    {!loading && <div className="w-full h-[100%]"></div>}
                   </div>
                 </div>
               </div>
@@ -86,10 +202,41 @@ const page = ({ params }) => {
               <div className="custom_container mx-auto w-[100%] h-[100%] flex  items-center">
                 <div className="px-14 w-[100%]">
                   <div className="bg-white p-2 w-[100%] rounded-lg flex gap-2 justify-between">
-                    <button className="bg-crayola-sky-blue rounded-lg flex-1 p-2 ">
-                      Prefer any changes
-                    </button>
-                    <button className="text-white text-sm flex-1 p-2 bg-dark-orange rounded-lg">
+                    {}
+                    <div className="flex flex-1">
+                      {!prefChangesModal && (
+                        <button
+                          className="w-full p-2 rounded-lg bg-crayola-sky-blue"
+                          onClick={() => {
+                            console.log("trigger");
+                            setPrefChangesModal(true);
+                          }}
+                        >
+                          Prefer any changes
+                        </button>
+                      )}
+                      {prefChangesModal && (
+                        <div className="flex w-[100%]">
+                          <input
+                            className="p-3 w-[100%] text-xs rounded-lg outline-none "
+                            placeholder="Share your idea to start the book creation"
+                            type="text"
+                            value={storyUpdates}
+                            onBlur={() => setPrefChangesModal(false)}
+                            onChange={(e) => setStoryUpdates(e.target.value)}
+                          />
+                          <button className="p-[10px] rounded-lg bg-crayola-sky-blue">
+                            <Image src={SendIcon} alt={"send-icon"} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      className={` p-2 text-white rounded-lg bg-dark-orange ${
+                        !prefChangesModal && "flex-1"
+                      }`}
+                      onClick={async () => await fetchImages(data)}
+                    >
                       Generate pics
                     </button>
                   </div>
@@ -103,4 +250,4 @@ const page = ({ params }) => {
   );
 };
 
-export default page;
+export default Page;

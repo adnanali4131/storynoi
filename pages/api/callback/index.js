@@ -13,7 +13,6 @@ const prisma = new PrismaClient();
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const code = await req.query;
-    console.log(code, 'code');
 
     if (!code) {
       return res.json({ error: 'No code provided' });
@@ -57,29 +56,3 @@ export default async function handler(req, res) {
 }
 
 
-// import { OAuth2Client } from "google-auth-library";
-
-// const client = new OAuth2Client({
-//   clientId: process.env.GOOGLE_CLIENT_ID,
-//   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//   redirectUri: "http://localhost:3000/api/callback",
-// });
-
-// export default async function handler(req, res) {
-//   if (req.method === 'GET') {
-//     const code = await req.query
-
-//     if (!code) {
-//       return res.json({ error: 'No code provided' });
-//     }
-
-//     const { tokens } = await client.getToken(code);
-//     const { payload } = await client.verifyIdToken({ idToken: tokens.id_token });
-
-//     const email = payload.email;
-//     const firstName = payload.given_name;
-//     const lastName = payload.family_name;
-
-//     return res.json({ email, firstName, lastName });
-//   }
-// }

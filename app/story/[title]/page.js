@@ -39,7 +39,7 @@ const Page = ({ params }) => {
               heading: el.heading,
               description: el.description,
               image: "",
-              imageText: "Click on generate pics",
+              imageText: "No image generated yet!",
             };
           })
         );

@@ -11,8 +11,6 @@ const openAi = new OpenAIApi(config);
 export async function POST(req) {
   try {
     const { messages } = await req.json();
-    console.log(messages)
-
     let systemMessage = [
       {
         role: "system",
@@ -27,15 +25,10 @@ export async function POST(req) {
       },
     ];
 
-
-
-    console.log([systemMessage, ...messages])
-
     const response = await openAi.createChatCompletion({
       model: "gpt-3.5-turbo",
       messages: [systemMessage, ...messages],
     });
-
     const data =
       response.data.choices && response.data.choices[0]
         ? response.data.choices[0].message.content

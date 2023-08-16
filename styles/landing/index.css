@@ -1,0 +1,37 @@
+/* HERO SECTION  */
+.hero-section {
+  overflow: hidden;
+}
+.hero-section .bg-overlay-net {
+  background-image: url("../../assets/landing/bg-overlay-hero-section.png");
+  background-position: center;
+  background-size: cover;
+  width: 100%;
+  position: absolute;
+  height: 100%;
+  z-index: 1;
+}
+
+/* HERO SECTION  */
+/* ABOUT US SECTION */
+.aboutus-section .bg-overlay-net {
+  background-image: url("../../assets/landing/bg-overlay-about-us.png");
+  background-position: center;
+  background-size: cover;
+  width: 100%;
+  position: absolute;
+  height: 100%;
+  z-index: 1;
+}
+/* ABOUT US SECTION */
+/* CREATE EBOOK SECTION */
+.create-ebook-section .bg-overlay-net {
+  background-image: url("../../assets/landing/bg-overlay-ebook-section.png");
+  background-position: center;
+  background-size: cover;
+  width: 100%;
+  position: absolute;
+  height: 100%;
+  z-index: 1;
+}
+/* CREATE EBOOK SECTION */

@@ -1,3 +1,6 @@
+"use client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Image from "next/image";
 import Star from "@/assets/landing/icon/star.svg";
 import overlay6 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-6.png";
@@ -8,9 +11,14 @@ import downloadIcon from "@/assets/landing/icon/download.svg";
 import userIcon from "@/assets/landing/icon/user.svg";
 import overlay4 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-4.png";
 const HeroSection = () => {
+  const router = useRouter();
+  const [storyTitle, setStoryTitle] = useState("");
+  const handleCreateStory = () => {
+    router.push(`/story/${storyTitle}`);
+  };
   return (
     <div className="py-20">
-      <div className="custom_container mx-auto">
+      <div className="mx-auto custom_container">
         <div className="flex justify-between">
           <div className="relative flex items-center flex-1 text-content">
             <Image
@@ -28,7 +36,7 @@ const HeroSection = () => {
               />
               <h2 className="text-[42px] font-extrabold">
                 Let Gen - AI Turn Your Idea to a{" "}
-                <span className="text-dark-orange">kid’s Book!</span>{" "}
+                <span className="text-rose-pink">kid’s Book!</span>{" "}
               </h2>
               <p className="mt-10 text-xl font-normal">
                 Express your idea in a few words!
@@ -37,8 +45,15 @@ const HeroSection = () => {
                 <input
                   className="flex-1 p-3 text-xs rounded-lg outline-none"
                   placeholder="Share your idea to start the book creation"
+                  type="text"
+                  value={storyTitle}
+                  onChange={(e) => setStoryTitle(e.target.value)}
                 />
-                <button className="px-5 py-3 text-sm font-medium text-white rounded-lg bg-dark-orange">
+                <button
+                  type="button"
+                  onClick={handleCreateStory}
+                  className="px-5 py-3 text-sm font-medium text-white rounded-lg outline-none bg-rose-pink"
+                >
                   Create Story
                 </button>
               </div>

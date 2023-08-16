@@ -8,7 +8,10 @@ const Header = () => {
       <div className="custom_container mx-auto">
         <div className="flex items-center justify-between">
           <div className="logo">
-            <Image src={Logo} alt="logo" width={100} />
+            <Link href={"/"}>
+              {" "}
+              <Image src={Logo} alt="logo" width={100} />
+            </Link>
           </div>
           <div className="nav-items">
             <ul className="flex items-center justify-center gap-12">

@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from "next/server";
 
-const engineId = process.env.ENGINE_ID
-const apiHost = process.env.API_HOST
-const apiKey = process.env.API_KEY
+const engineId = process.env.ENGINE_ID;
+const apiHost = process.env.API_HOST;
+const apiKey = process.env.API_KEY;
 
 export async function POST(req) {
   const { summary, description } = await req.json();
@@ -11,21 +11,21 @@ export async function POST(req) {
     const stabilityResponse = await fetch(
       `${apiHost}/v1/generation/${engineId}/text-to-image`,
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
           text_prompts: [
             {
-              text: `Context: ${summary}. Based on this context, create a visual representation of the following description: ${description}.`
+              text: `Context: ${summary}. Based on this context, create a visual representation of the following description: ${description}.`,
             },
           ],
           cfg_scale: 7,
-          height: 1024,
-          width: 1024,
+          height: 512,
+          width: 512,
           steps: 30,
           samples: 1,
         }),
@@ -33,7 +33,9 @@ export async function POST(req) {
     );
 
     if (stabilityResponse.status === 429) {
-      throw new Error("Rate limit reached for Stability AI. Please try again later.");
+      throw new Error(
+        "Rate limit reached for Stability AI. Please try again later."
+      );
     }
 
     const stabilityData = await stabilityResponse.json();
@@ -42,6 +44,9 @@ export async function POST(req) {
     return NextResponse.json({ images });
   } catch (error) {
     console.log(error);
-    return NextResponse.json({ status: 500, message: error.message || "Internal Server Error" });
+    return NextResponse.json({
+      status: 500,
+      message: error.message || "Internal Server Error",
+    });
   }
 }

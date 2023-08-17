@@ -9,8 +9,6 @@ const openAi = new OpenAIApi(config);
 
 export default async function handler(req, res) {
   try {
-    // console.log(req.body, "req");
-
     if (req.method === "POST") {
       const { messages } = JSON.parse(req.body);
       let systemMessage = {

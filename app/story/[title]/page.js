@@ -243,7 +243,7 @@ const Page = ({ params }) => {
                       )}
                     </div>
                     <button
-                      className={` p-2 text-white rounded-lg bg-dark-orange ${
+                      className={` p-2 text-white rounded-lg bg-rose-pink ${
                         !prefChangesModal && "flex-1"
                       }`}
                       onClick={async () => await fetchImages(data)}

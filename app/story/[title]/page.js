@@ -20,34 +20,45 @@ const Page = ({ params }) => {
   const [prefChangesModal, setPrefChangesModal] = useState(false);
   const [storyUpdates, setStoryUpdates] = useState("");
   const [printModal, setPrintModal] = useState(false);
-  useEffect(() => {
+
+  const [conversation, setConversation] = useState([]);
+
+  const createStory = async (content) => {
+    setData([]);
     setLoading(true);
     setLoadingText("Gathering Fairy Tale for Stories... ✨📜");
-    const createStory = async () => {
-      const res = await (
-        await fetch("/api/ai", {
-          method: "POST",
-          body: JSON.stringify({
-            message: params.title,
-          }),
-        })
-      ).json();
+    setConversation((curr) => [...curr, { role: "user", content }]);
 
-      if (res) {
-        setData(
-          res.map((el) => {
-            return {
-              heading: el.heading,
-              description: el.description,
-              image: "",
-              imageText: "No image generated yet!",
-            };
-          })
-        );
-        setLoading(false);
-      }
-    };
-    createStory();
+    const res = await (
+      await fetch("/api/ai", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: [...conversation, { role: "user", content }],
+        }),
+      })
+    ).json();
+
+    if (res) {
+      setData(
+        res.map((el) => {
+          return {
+            heading: el.heading,
+            description: el.description,
+            image: el.image || "",
+            imageText: "No image generated yet!",
+          };
+        })
+      );
+      setConversation((curr) => [
+        ...curr,
+        { role: "assistant", content: JSON.stringify(res) },
+      ]);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    createStory(params.title);
   }, []);
 
   const defaultOptions = {
@@ -59,15 +70,12 @@ const Page = ({ params }) => {
     },
   };
   const fetchImages = async (storyData) => {
-    setLoading(true);
-    setLoadingText("Assembling Words into Adventures... 🌟📖");
     const stories = [...storyData];
     const length = storyData?.length;
     stories.forEach((story) => {
       story.imageText = "Generating illustration...";
     });
     setData([...stories]);
-    // stories[i].imageText = "Generating Pic...";
     for (let i = 0; i < length; i++) {
       if (stories[i].heading !== SUMMARY) {
         try {
@@ -155,6 +163,7 @@ const Page = ({ params }) => {
                 <div className="h-[80vh]  py-10 px-5 ">
                   <div className="flex flex-col h-full px-5 py-2 overflow-auto content-container gap-9">
                     {data.length > 0 &&
+                      !loading &&
                       data.map(
                         (el) =>
                           el.heading !== SUMMARY && (
@@ -163,7 +172,7 @@ const Page = ({ params }) => {
                                 key={el.heading}
                                 className="flex items-center gap-5 text-black bg-white shadow-sm rounded-xl"
                               >
-                                <div className="w-full flex-1 h-[500px] flex overflow-hidden  justify-center items-center flex-col shadow-sm">
+                                <div className="w-full flex-1 h-[500px] flex overflow-hidden  justify-center items-center flex-col shadow-[10px 4px 12px 0px #0000001F]">
                                   {el.image ? (
                                     <Image
                                       src={el.image}

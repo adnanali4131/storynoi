@@ -12,8 +12,12 @@ import Lottie from "react-lottie";
 import * as animationData from "@/assets/stories/book-loader.json";
 import { SUMMARY } from "@/constants/index";
 import downloadImage from "@/assets/stories/download.svg";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 
 const Page = ({ params }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("");
@@ -32,13 +36,15 @@ const Page = ({ params }) => {
         method: "POST",
         body: JSON.stringify({
           messages: [...conversation, { role: "user", content }],
+          id: searchParams.get("id"),
         }),
       })
     ).json();
 
     if (res) {
+      console.log(res, "res");
       setData(
-        res.map((el) => {
+        res.data.map((el) => {
           return {
             heading: el.heading,
             description: el.description,
@@ -52,6 +58,7 @@ const Page = ({ params }) => {
         { role: "assistant", content: JSON.stringify(res) },
       ]);
       setLoading(false);
+      router.push(`${pathname}?id=${res.id}`);
     }
   };
 
@@ -74,7 +81,7 @@ const Page = ({ params }) => {
       story.imageText = "Generating Pic...";
     });
     setData([...stories]);
-    for (let i = 0; i < length; i++) {
+    for (let i = 0; i < 1; i++) {
       if (stories[i].heading !== SUMMARY) {
         try {
           setData([...stories]);
@@ -99,6 +106,7 @@ const Page = ({ params }) => {
 
             stories[i].image = generateImageURL;
             stories[i].imageText = "";
+            storeImgToS3(stories[i], res.images.artifacts[0].base64);
             setData([...stories]);
           }
         } catch (err) {
@@ -108,7 +116,19 @@ const Page = ({ params }) => {
       }
     }
   };
-
+  function storeImgToS3(storyObj, base64) {
+    console.log(base64);
+    fetch("/api/storage", {
+      method: "POST",
+      body: JSON.stringify({
+        heading: storyObj.heading,
+        base64,
+        id: searchParams.get("id"),
+      }),
+    }).then((res) => {
+      console.log(res, "res");
+    });
+  }
   return (
     <div>
       <section className="relative overflow-hidden hero-section h-[100vh] bg-mustard">

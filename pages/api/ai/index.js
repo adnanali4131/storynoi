@@ -55,7 +55,6 @@ const handler = async (req, res) => {
       return res.send(data);
     }
   } catch (error) {
-
     return res.json({ message: error.message });
   }
 };

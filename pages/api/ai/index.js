@@ -1,4 +1,7 @@
+import authenticateJWT from "@/middleware";
 const { Configuration, OpenAIApi } = require("openai");
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 const config = new Configuration({
   apiKey: process.env.OPEN_AI_API_KEY,
@@ -7,7 +10,8 @@ const config = new Configuration({
 
 const openAi = new OpenAIApi(config);
 
-export default async function handler(req, res) {
+const handler = async (req, res) => {
+
   try {
     if (req.method === "POST") {
       const { messages } = JSON.parse(req.body);
@@ -32,9 +36,23 @@ export default async function handler(req, res) {
           ? response.data.choices[0].message.content
           : "No response from OpenAI";
 
+      const parsedData = JSON.parse(data);
+      const titleObj = parsedData.find(item => item.heading === "Title");
+      const title = titleObj ? titleObj.description : null;
+
+      if (title) {
+        const story = await prisma.story.create({
+          data: {
+            title: title,
+            userId: req.user.userId,
+          },
+        });
+      }
       return res.send(data);
     }
   } catch (error) {
     return res.json({ message: error.message });
   }
-}
+};
+
+export default authenticateJWT(handler);

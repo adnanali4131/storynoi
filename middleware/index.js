@@ -1,20 +1,22 @@
-
-
 import jwt from 'jsonwebtoken';
-import { NextResponse } from 'next/server'
 
+const authenticateJWT = (handler) => {
+  return async (req, res) => {
+    const authHeader = req.headers.authorization;
 
-export default function authenticate(req, res, next) {
-  const token = req.headers.authorization;
-  if (!token) {
-    return NextResponse.json({ message: 'Authentication failed' });
-  }
+    if (!authHeader) {
+      return res.status(401).json({ error: 'Authorization header missing' });
+    }
+    const token = authHeader.split(' ')[1];
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return NextResponse.json({ message: 'Invalid token' });
-  }
-}
+    try {
+      const user = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = user;
+      return handler(req, res);
+    } catch (err) {
+      return res.status(403).json({ error: 'Invalid token' });
+    }
+  };
+};
+
+export default authenticateJWT;

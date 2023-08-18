@@ -1,4 +1,7 @@
+import authenticateJWT from "@/middleware";
 const { Configuration, OpenAIApi } = require("openai");
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 const config = new Configuration({
   apiKey: process.env.OPEN_AI_API_KEY,
@@ -7,21 +10,26 @@ const config = new Configuration({
 
 const openAi = new OpenAIApi(config);
 
-export default async function handler(req, res) {
+const handler = async (req, res) => {
+
   try {
     if (req.method === "POST") {
-      const { messages } = JSON.parse(req.body);
-      let systemMessage = {
+      if (res.headersSent) return;
+
+      const messages = req.body.messages
+
+      let systemMessage =
+      {
         role: "system",
         content: `You can only reply in JSON Format. You can only reply in below JSON Format.
           [
-           {
-              "heading": "heading for the heading in string format",
-              "description": "story for that heading in string format"
-            }
-          ]
-          You are a children's story writer. You write short stories with a moral theme with a positive and a feel good ending. The plot of the story is divided into specific heading. Please provide a story structure using the following headings: Title, Plot, Inciting Incident, Rising Action, Dilemma, Climax, Denouement, and Moral, and a brief Summary having all the details which can easily understand by stability ai to generate images . The stories must be at-least 400 words. All stories need to be positive and have a happy ending. Don't mention adult content, religion. Please keep stories kids friendly and imaginative as much as possible. Avoid use of words 'punish' or adults hitting kids. Reply in the following JSON formatted response: `,
-      };
+          {
+            "heading": "heading for the heading in string format",
+            "description": "story for that heading in string format"
+          }
+        ]
+          You are a children's story writer. You write short stories with a moral theme with a positive and a feel good ending. The plot of the story is divided into specific heading. Please provide a story structure using the following headings: Title, Plot, Inciting Incident, Rising Action, Dilemma, Climax, Denouement, and Moral, and a brief Summary having all the details which can easily understand by stability ai to generate images . The stories must be at-least 400 words. All stories need to be positive and have a happy ending. Don't mention adult content, religion.Please keep stories kids friendly and imaginative as much as possible.Avoid use of words 'punish' or adults hitting kids.Reply in the following JSON formatted response: `
+      }
 
       const response = await openAi.createChatCompletion({
         model: "gpt-3.5-turbo",
@@ -32,9 +40,23 @@ export default async function handler(req, res) {
           ? response.data.choices[0].message.content
           : "No response from OpenAI";
 
+      const parsedData = JSON.parse(data);
+      const titleObj = parsedData.find(item => item.heading === "Title");
+      const title = titleObj ? titleObj.description : null;
+
+      if (title) {
+        const story = await prisma.story.create({
+          data: {
+            title: title,
+            userId: req.user.userId,
+          },
+        });
+      }
       return res.send(data);
     }
   } catch (error) {
     return res.json({ message: error.message });
   }
-}
+};
+
+export default authenticateJWT(handler);

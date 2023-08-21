@@ -12,8 +12,12 @@ import Lottie from "react-lottie";
 import * as animationData from "@/assets/stories/book-loader.json";
 import { SUMMARY } from "@/constants/index";
 import downloadImage from "@/assets/stories/download.svg";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 
 const Page = ({ params }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("");
@@ -34,26 +38,32 @@ const Page = ({ params }) => {
         method: "POST",
         body: JSON.stringify({
           messages: [...conversation, { role: "user", content }],
+          id: searchParams.get("id"),
         }),
       })
     ).json();
 
     if (res) {
-      setData(
-        res.map((el) => {
-          return {
-            heading: el.heading,
-            description: el.description,
-            image: el.image || "",
-            imageText: "No image generated yet!",
-          };
-        })
-      );
+      const formattedState = res.data.map((el) => {
+        const url =
+          res.story.imageUrl.find(
+            (storyData) => storyData.heading === el.heading
+          ) || "";
+
+        return {
+          heading: el.heading,
+          description: el.description,
+          image: url.url,
+          imageText: "No image generated yet!",
+        };
+      });
+      setData(formattedState);
       setConversation((curr) => [
         ...curr,
         { role: "assistant", content: JSON.stringify(res) },
       ]);
       setLoading(false);
+      router.push(`${pathname}?id=${res.id}`);
     }
   };
 
@@ -101,6 +111,7 @@ const Page = ({ params }) => {
 
             stories[i].image = generateImageURL;
             stories[i].imageText = "";
+            storeImgToS3(stories[i], res.images.artifacts[0].base64);
             setData([...stories]);
           }
         } catch (err) {
@@ -112,6 +123,25 @@ const Page = ({ params }) => {
     setLoading(false);
     setPrintModal(true);
   };
+  function storeImgToS3(storyObj, base64) {
+    fetch("/api/storage", {
+      method: "POST",
+      body: JSON.stringify({
+        heading: storyObj.heading,
+        base64,
+        id: searchParams.get("id"),
+      }),
+    }).then((res) => {
+      let storyState = [...data];
+      storyState = storyState.map((story) => {
+        if (story.heading === storyObj.heading) {
+          story.image = res.url;
+          return story;
+        } else return story;
+      });
+      setData(storyState);
+    });
+  }
 
   async function generateAndDownloadPDF() {
     const response = await fetch("/api/generate-pdf", {

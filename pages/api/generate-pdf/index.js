@@ -7,9 +7,10 @@ export default async function handler(req, res) {
     let pageContent = "";
 
     for (let i = 0; i < storyContent.length; i++) {
-      pageContent +=
-        storyContent[i].image.length > 0
-          ? `<div
+      if (storyContent[i].heading !== "Summary")
+        pageContent +=
+          storyContent[i].image && storyContent[i].image.length > 0
+            ? `<div
           key={${storyContent[i].heading}}
           style="display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always"
         >
@@ -19,19 +20,20 @@ export default async function handler(req, res) {
       key={${storyContent[i].heading}}
       style="display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always"
     >
-    <div style="width:75%;justify-content:center; align-items:center; flex-direction:column; display:flex;">
-    <h1>${storyContent[i].heading}</h1>
-    <p style="text-align:center">${storyContent[i].description}</p>
+    <div style="font-family: 'Noto Sans Symbols' , sans-serif ;width:75%;justify-content:center; align-items:center; flex-direction:column; display:flex;">
+    <h1 style="margin:0 ; font-size:24px">${storyContent[i].heading}</h1>
+    <p style="text-align:center margin:0; font-size:18px">${storyContent[i].description}</p>
     </div>
     </div>
         `
-          : `<div
+            : `<div
       key={${storyContent[i].heading}}
-      style="display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always"
+      style="font-family: 'Noto Sans Symbols', sans-serif;
+      display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always"
     >
       <div style="width:75%;justify-content:center; align-items:center; flex-direction:column; display:flex;">
-      <h1>${storyContent[i].heading}</h1>
-      <p style="text-align:center">${storyContent[i].description}</p>
+      <h1 style="margin:0; font-size:24px">${storyContent[i].heading}</h1>
+      <p style="text-align:center; margin:0;font-size:18px;">${storyContent[i].description}</p>
       </div>
     </div>`;
     }
@@ -43,7 +45,8 @@ export default async function handler(req, res) {
     await page.setContent(pageContent);
 
     const pdfBuffer = await page.pdf({
-      format: "A4",
+      height: "512px",
+      width: "512px",
       margin: {
         left: 0,
         right: 0,
@@ -62,8 +65,15 @@ export default async function handler(req, res) {
     res.setHeader("Content-Disposition", "attachment; filename=story.pdf");
     res.status(200).send(combinedPdfBuffer);
   } catch (error) {
-    console.error("Error:", error);
     await browser.close();
     res.status(500).send("Internal Server Error");
   }
 }
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "7mb", // Set desired value here
+    },
+  },
+};

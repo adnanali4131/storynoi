@@ -16,8 +16,8 @@ export default async function handler(req, res) {
           },
         ],
         cfg_scale: 7,
-        height: 1024,
-        width: 1024,
+        height: 512,
+        width: 512,
         steps: 30,
         samples: 1,
       };
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       } else if (style) {
         return res.json({
           status: 400,
-          message: "Invalid style provided."
+          message: "Invalid style provided.",
         });
       }
 
@@ -55,7 +55,6 @@ export default async function handler(req, res) {
 
       return res.json({ images });
     } catch (error) {
-      console.log(error);
       return res.json({
         status: 500,
         message: error.message || "Internal Server Error",

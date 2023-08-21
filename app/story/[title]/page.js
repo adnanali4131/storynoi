@@ -12,13 +12,19 @@ import Lottie from "react-lottie";
 import * as animationData from "@/assets/stories/book-loader.json";
 import { SUMMARY } from "@/constants/index";
 import downloadImage from "@/assets/stories/download.svg";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 
 const Page = ({ params }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState("");
   const [prefChangesModal, setPrefChangesModal] = useState(false);
   const [storyUpdates, setStoryUpdates] = useState("");
+  const [printModal, setPrintModal] = useState(false);
+
   const [conversation, setConversation] = useState([]);
 
   const createStory = async (content) => {
@@ -32,26 +38,32 @@ const Page = ({ params }) => {
         method: "POST",
         body: JSON.stringify({
           messages: [...conversation, { role: "user", content }],
+          id: searchParams.get("id"),
         }),
       })
     ).json();
 
     if (res) {
-      setData(
-        res.map((el) => {
-          return {
-            heading: el.heading,
-            description: el.description,
-            image: el.image || "",
-            imageText: "No image generated yet!",
-          };
-        })
-      );
+      const formattedState = res.data.map((el) => {
+        const url =
+          res.story.imageUrl.find(
+            (storyData) => storyData.heading === el.heading
+          ) || "";
+
+        return {
+          heading: el.heading,
+          description: el.description,
+          image: url.url,
+          imageText: "No image generated yet!",
+        };
+      });
+      setData(formattedState);
       setConversation((curr) => [
         ...curr,
         { role: "assistant", content: JSON.stringify(res) },
       ]);
       setLoading(false);
+      router.push(`${pathname}?id=${res.id}`);
     }
   };
 
@@ -71,7 +83,7 @@ const Page = ({ params }) => {
     const stories = [...storyData];
     const length = storyData?.length;
     stories.forEach((story) => {
-      story.imageText = "Generating Pic...";
+      story.imageText = "Generating illustration...";
     });
     setData([...stories]);
     for (let i = 0; i < length; i++) {
@@ -99,15 +111,55 @@ const Page = ({ params }) => {
 
             stories[i].image = generateImageURL;
             stories[i].imageText = "";
+            storeImgToS3(stories[i], res.images.artifacts[0].base64);
             setData([...stories]);
           }
         } catch (err) {
-          stories[i].imageText = "Failed to generate pic";
+          stories[i].imageText = "Failed to generate illustration";
           setData([...stories]);
         }
       }
     }
+    setLoading(false);
+    setPrintModal(true);
   };
+  function storeImgToS3(storyObj, base64) {
+    fetch("/api/storage", {
+      method: "POST",
+      body: JSON.stringify({
+        heading: storyObj.heading,
+        base64,
+        id: searchParams.get("id"),
+      }),
+    }).then((res) => {
+      let storyState = [...data];
+      storyState = storyState.map((story) => {
+        if (story.heading === storyObj.heading) {
+          story.image = res.url;
+          return story;
+        } else return story;
+      });
+      setData(storyState);
+    });
+  }
+
+  async function generateAndDownloadPDF() {
+    const response = await fetch("/api/generate-pdf", {
+      method: "POST",
+      body: JSON.stringify({
+        storyContent: data,
+      }),
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "story.pdf";
+      link.click();
+    }
+  }
 
   return (
     <div>
@@ -208,49 +260,64 @@ const Page = ({ params }) => {
             <div className="w-[100%] z-30 h-[90px] bottom-[90px] absolute  bg-crayola-sky-blue">
               <div className="custom_container mx-auto w-[100%] h-[100%] flex  items-center">
                 <div className="px-14 w-[100%]">
-                  <div className="bg-white p-2 w-[100%] rounded-lg flex gap-2 justify-between">
-                    {}
-                    <div className="flex flex-1">
-                      {!prefChangesModal && (
+                  {!printModal ? (
+                    <div className="bg-white p-2 w-[100%] rounded-lg flex gap-2 justify-between">
+                      <div className="flex flex-1">
+                        {!prefChangesModal && (
+                          <button
+                            className="w-full p-2 rounded-lg bg-crayola-sky-blue"
+                            onClick={() => {
+                              console.log("trigger");
+                              setPrefChangesModal(true);
+                            }}
+                          >
+                            Prefer any changes
+                          </button>
+                        )}
+                        {prefChangesModal && (
+                          <div className="flex w-[100%]">
+                            <input
+                              className="p-3 w-[100%] text-xs rounded-lg outline-none "
+                              placeholder="Share your idea to start the book creation"
+                              type="text"
+                              value={storyUpdates}
+                              onBlur={() => setPrefChangesModal(false)}
+                              onChange={(e) => setStoryUpdates(e.target.value)}
+                            />
+                            <button className="p-[10px] rounded-lg bg-crayola-sky-blue">
+                              <Image src={SendIcon} alt={"send-icon"} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        className={` p-2 text-white rounded-lg bg-dark-orange ${
+                          !prefChangesModal && "flex-1"
+                        }`}
+                        onClick={async () => await fetchImages(data)}
+                      >
+                        Generate pics
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="bg-white p-2 w-[100%] rounded-lg flex gap-2 justify-between">
+                      <div className="flex flex-1">
                         <button
                           className="w-full p-2 rounded-lg bg-crayola-sky-blue"
-                          onClick={() => {
-                            console.log("trigger");
-                            setPrefChangesModal(true);
-                          }}
+                          onClick={async () => await generateAndDownloadPDF()}
                         >
-                          Prefer any changes
+                          Download ebook
                         </button>
-                      )}
-                      {prefChangesModal && (
-                        <div className="flex w-[100%]">
-                          <input
-                            className="p-3 w-[100%] text-xs rounded-lg outline-none "
-                            placeholder="Share your idea to start the book creation"
-                            type="text"
-                            value={storyUpdates}
-                            onChange={(e) => setStoryUpdates(e.target.value)}
-                          />
-                          <button
-                            className="p-[10px] rounded-lg bg-crayola-sky-blue"
-                            onClick={async () =>
-                              await createStory(storyUpdates)
-                            }
-                          >
-                            <Image src={SendIcon} alt={"send-icon"} />
-                          </button>
-                        </div>
-                      )}
+                      </div>
+                      <button
+                        className={` p-2 text-white rounded-lg bg-dark-orange ${
+                          !prefChangesModal && "flex-1"
+                        }`}
+                      >
+                        Print the book
+                      </button>
                     </div>
-                    <button
-                      className={` p-2 text-white rounded-lg bg-rose-pink ${
-                        !prefChangesModal && "flex-1"
-                      }`}
-                      onClick={async () => await fetchImages(data)}
-                    >
-                      Generate pics
-                    </button>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>

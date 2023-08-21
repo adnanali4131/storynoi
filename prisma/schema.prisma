@@ -8,9 +8,18 @@ datasource db {
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
+  id        String  @id @unique @default(uuid())
   firstName String
   lastName  String
   email     String  @unique
   password  String?
+  Story     Story[]
+}
+
+model Story {
+  id       String  @id @unique @default(uuid())
+  title    String
+  imageUrl String?
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
 }

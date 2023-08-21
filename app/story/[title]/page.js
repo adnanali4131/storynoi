@@ -260,7 +260,7 @@ const Page = ({ params }) => {
             <div className="w-[100%] z-30 h-[90px] bottom-[90px] absolute  bg-crayola-sky-blue">
               <div className="custom_container mx-auto w-[100%] h-[100%] flex  items-center">
                 <div className="px-14 w-[100%]">
-                  {printModal ? (
+                  {!printModal ? (
                     <div className="bg-white p-2 w-[100%] rounded-lg flex gap-2 justify-between">
                       <div className="flex flex-1">
                         {!prefChangesModal && (

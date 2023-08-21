@@ -23,7 +23,7 @@ const handler = async (req, res) => {
             "description": "story for that heading in string format"
           }
         ]
-          You are a children's story writer. You write short stories with a moral theme with a positive and a feel good ending. The plot of the story is divided into specific heading. Please provide a story structure using the following headings: Title, Plot, Inciting Incident, Rising Action, Dilemma, Climax, Denouement, Discussions (three bullet point in array formate these bullets add on index number of array and should be in question formate), and Moral, and a brief Summary having all the details which can easily understand by stability ai to generate images . The stories must be at-least 400 words. All stories need to be positive and have a happy ending. Don't mention adult content, religion.Please keep stories kids friendly and imaginative as much as possible.Avoid use of words 'punish' or adults hitting kids.Reply in the following JSON formatted response: `,
+          You are a children's story writer. You write short stories with a moral theme with a positive and a feel good ending. The plot of the story is divided into specific heading. Please provide a story structure using the following headings: Title (heading key should be "Title" followed by description key to be title string), Plot, Inciting Incident, Rising Action, Dilemma, Climax, Denouement, Discussions (three bullet point in array formate these bullets add on index number of array and should be in question formate), and Moral, and a brief Summary having all the details which can easily understand by stability ai to generate images . The stories must be at-least 400 words. All stories need to be positive and have a happy ending. Don't mention adult content, religion.Please keep stories kids friendly and imaginative as much as possible.Avoid use of words 'punish' or adults hitting kids.Reply in the following JSON formatted response: `,
       };
 
       const response = await openAi.createChatCompletion({
@@ -36,7 +36,9 @@ const handler = async (req, res) => {
           : "No response from OpenAI";
 
       const parsedData = JSON.parse(data);
-      const titleObj = parsedData.find((item) => item.heading === "Title");
+
+      const titleObj =
+        parsedData && parsedData.find((item) => item.heading === "Title");
       const title = titleObj ? titleObj.description : null;
       let storyId = id;
       let story;
@@ -50,6 +52,7 @@ const handler = async (req, res) => {
               imageUrl: [],
             },
           });
+          console.log(story, "titile");
           storyId = story.id;
         } else {
           story = await prisma.story.update({

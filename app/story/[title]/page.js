@@ -23,25 +23,25 @@ const selectList = [
   {
     id: 1,
     name: "Fantasy",
-    value: "Fantasy",
+    value: "fantasy-art",
     avatar: Fantasy,
   },
   {
     id: 2,
     name: "Art",
-    value: "Art",
+    value: "digital-art",
     avatar: Art,
   },
   {
     id: 3,
     name: "Anime",
-    value: "Anime",
+    value: "anime",
     avatar: Anime,
   },
   {
     id: 4,
     name: "Cartoon",
-    value: "Cartoon",
+    value: "comic-book",
     avatar: Cartoon,
   },
 ];
@@ -81,9 +81,12 @@ const Page = ({ params }) => {
     if (res) {
       const formattedState = res.data.map((el) => {
         const url =
-          res.story.imageUrl.find(
-            (storyData) => storyData.heading === el.heading
-          ) || "";
+          (res.story.imageUrl &&
+            res.story.imageUrl.length > 0 &&
+            res.story.imageUrl?.find(
+              (storyData) => storyData.heading === el.heading
+            )) ||
+          "";
 
         return {
           heading: el.heading,
@@ -132,6 +135,7 @@ const Page = ({ params }) => {
                 summary: storyData.find((el) => el.heading === SUMMARY)
                   .description,
                 description: stories[i].description,
+                style: selectedGenre.value,
               }),
             })
           ).json();
@@ -146,7 +150,11 @@ const Page = ({ params }) => {
 
             stories[i].image = generateImageURL;
             stories[i].imageText = "";
-            storeImgToS3(stories[i], res.images.artifacts[0].base64);
+            storeImgToS3(
+              stories[i],
+              res.images.artifacts[0].base64,
+              updateImageUrl
+            );
             setData([...stories]);
           }
         } catch (err) {
@@ -158,7 +166,7 @@ const Page = ({ params }) => {
     setLoading(false);
     setPrintModal(true);
   };
-  function storeImgToS3(storyObj, base64) {
+  function storeImgToS3(storyObj, base64, updateImageUrl) {
     fetch("/api/storage", {
       method: "POST",
       body: JSON.stringify({
@@ -166,18 +174,28 @@ const Page = ({ params }) => {
         base64,
         id: searchParams.get("id"),
       }),
-    }).then((res) => {
-      let storyState = [...data];
-      storyState = storyState.map((story) => {
-        if (story.heading === storyObj.heading) {
-          story.image = res.url;
-          return story;
-        } else return story;
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return res.json();
+      })
+      .then((res) => {
+        updateImageUrl(storyObj, res);
       });
-      setData(storyState);
-    });
   }
 
+  function updateImageUrl(storyObj, res) {
+    let storyState = [...data];
+    storyState = storyState.map((story) => {
+      if (story.heading === storyObj.heading) {
+        story.image = res.url;
+        return story;
+      } else return story;
+    });
+    setData(storyState);
+  }
   async function generateAndDownloadPDF() {
     const response = await fetch("/api/generate-pdf", {
       method: "POST",
@@ -262,9 +280,11 @@ const Page = ({ params }) => {
                                 </div>
                                 <div className="flex-1">
                                   <div className="h-[500px] items-center p-4 flex justify-center flex-col">
-                                    <h2 className="text-[24px] font-semibold">
-                                      {el.heading}
-                                    </h2>
+                                    {["Title", "Moral"].includes(el.heading) ? (
+                                      <h2 className="text-[24px] font-semibold">
+                                        {el.heading}
+                                      </h2>
+                                    ) : null}
                                     <p className="text-lg leading-7 text-center">
                                       {el.description}
                                     </p>

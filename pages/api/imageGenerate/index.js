@@ -6,8 +6,7 @@ const apiKey = process.env.API_KEY;
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    const { summary, description, style } = req.body;
-
+    const { summary, description, style } = JSON.parse(req.body);
     try {
       let requestBody = {
         text_prompts: [
@@ -30,7 +29,6 @@ export default async function handler(req, res) {
           message: "Invalid style provided.",
         });
       }
-
       const stabilityResponse = await fetch(
         `${apiHost}/v1/generation/${engineId}/text-to-image`,
         {

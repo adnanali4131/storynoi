@@ -14,15 +14,23 @@ export default async function handler(req, res) {
           key={${storyContent[i].heading}}
           style="display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always"
         >
-          <img src="${storyContent[i].image}" alt="${storyContent[i].heading}" style="width:100px, height:100px" />
+          <img src="${storyContent[i].image}" alt="${
+                storyContent[i].heading
+              }" style="width:100px, height:100px" />
         </div>
         <div
       key={${storyContent[i].heading}}
       style="display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always"
     >
     <div style="font-family: 'Noto Sans Symbols' , sans-serif ;width:75%;justify-content:center; align-items:center; flex-direction:column; display:flex;">
-    <h1 style="margin:0 ; font-size:24px">${storyContent[i].heading}</h1>
-    <p style="text-align:center margin:0; font-size:18px">${storyContent[i].description}</p>
+    ${
+      ["Title", "Moral"].includes(storyContent[i].heading)
+        ? ` <h1 style="margin:0;font-size:24px">${storyContent[i].heading}</h1>`
+        : ""
+    }
+    <p style="text-align:center margin:0; font-size:18px">${
+      storyContent[i].description
+    }</p>
     </div>
     </div>
         `
@@ -32,8 +40,15 @@ export default async function handler(req, res) {
       display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always"
     >
       <div style="width:75%;justify-content:center; align-items:center; flex-direction:column; display:flex;">
-      <h1 style="margin:0; font-size:24px">${storyContent[i].heading}</h1>
-      <p style="text-align:center; margin:0;font-size:18px;">${storyContent[i].description}</p>
+      
+      ${
+        ["Title", "Moral"].includes(storyContent[i].heading)
+          ? ` <h1 style="margin:0;font-size:24px">${storyContent[i].heading}</h1>`
+          : ""
+      }
+      <p style="text-align:center; margin:0;font-size:18px;">${
+        storyContent[i].description
+      }</p>
       </div>
     </div>`;
     }

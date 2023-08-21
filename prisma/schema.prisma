@@ -17,9 +17,10 @@ model User {
 }
 
 model Story {
-  id       String  @id @unique @default(uuid())
-  title    String
-  imageUrl String?
-  userId   String
-  user     User    @relation(fields: [userId], references: [id])
+  id         String @id @unique @default(uuid())
+  title      String
+  userPrompt String
+  imageUrl   Json?
+  userId     String
+  user       User   @relation(fields: [userId], references: [id])
 }

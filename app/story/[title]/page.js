@@ -42,17 +42,20 @@ const Page = ({ params }) => {
     ).json();
 
     if (res) {
-      console.log(res, "res");
-      setData(
-        res.data.map((el) => {
-          return {
-            heading: el.heading,
-            description: el.description,
-            image: el.image || "",
-            imageText: "No image generated yet!",
-          };
-        })
-      );
+      const formattedState = res.data.map((el) => {
+        const url =
+          res.story.imageUrl.find(
+            (storyData) => storyData.heading === el.heading
+          ) || "";
+
+        return {
+          heading: el.heading,
+          description: el.description,
+          image: url.url,
+          imageText: "No image generated yet!",
+        };
+      });
+      setData(formattedState);
       setConversation((curr) => [
         ...curr,
         { role: "assistant", content: JSON.stringify(res) },
@@ -81,7 +84,7 @@ const Page = ({ params }) => {
       story.imageText = "Generating Pic...";
     });
     setData([...stories]);
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < length; i++) {
       if (stories[i].heading !== SUMMARY) {
         try {
           setData([...stories]);
@@ -117,7 +120,6 @@ const Page = ({ params }) => {
     }
   };
   function storeImgToS3(storyObj, base64) {
-    console.log(base64);
     fetch("/api/storage", {
       method: "POST",
       body: JSON.stringify({
@@ -126,7 +128,14 @@ const Page = ({ params }) => {
         id: searchParams.get("id"),
       }),
     }).then((res) => {
-      console.log(res, "res");
+      let storyState = [...data];
+      storyState = storyState.map((story) => {
+        if (story.heading === storyObj.heading) {
+          story.image = res.url;
+          return story;
+        } else return story;
+      });
+      setData(storyState);
     });
   }
   return (

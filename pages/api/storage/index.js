@@ -1,6 +1,6 @@
 import client from "@/lib/storage/index";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 export default async function handler(req, res) {
   const { heading, base64, id } = JSON.parse(req.body);
@@ -18,19 +18,25 @@ export default async function handler(req, res) {
         })
       );
       const imageUrl = `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${imageKey}`;
-
+      console.log(id, "if");
       const story = await prisma.story.findFirst({
         where: {
           id,
         },
       });
       if (story) {
-        let imageUrls = story.imageUrl || [];
-        imageUrls = imageUrls.map((el) =>
-          el.heading === heading
-            ? { heading: el.heading, url: imageUrl }
-            : { heading: el.heading, url: imageUrl }
-        );
+        let imageUrls = setImageUrlArray(story.imageUrl, {
+          heading,
+          url: imageUrl,
+        });
+        // story.imageUrl.length > 0
+        //   ? story.imageUrl.map((el) => {
+        //       if (el.heading === heading) {
+        //         return { heading: el.heading, url: imageUrl };
+        //       }
+        //       return { heading: heading, url: imageUrl };
+        //     })
+        //   : [{ heading: heading, url: imageUrl }];
 
         await prisma.story.update({
           where: {
@@ -51,6 +57,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: err.message });
     }
   }
+}
+
+function setImageUrlArray(imageUrls = [], urlObj) {
+  let urlArray = [...imageUrls];
+  if (imageUrls.find((el) => el.heading === urlObj.heading)) {
+    urlArray = imageUrls.map((el) =>
+      el.heading === urlObj.heading ? urlObj : el
+    );
+  } else urlArray.push(urlObj);
+  return urlArray;
 }
 
 export const config = {

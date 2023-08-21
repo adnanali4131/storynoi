@@ -13,11 +13,8 @@ const openAi = new OpenAIApi(config);
 const handler = async (req, res) => {
   try {
     if (req.method === "POST") {
-      // if (res.headersSent) return;
-
       const { messages, id } = JSON.parse(req.body);
-      console.log(id, "id");
-
+      console.log(req.user, "req.user");
       let systemMessage = {
         role: "system",
         content: `You can only reply in JSON Format. You can only reply in below JSON Format.
@@ -43,21 +40,37 @@ const handler = async (req, res) => {
       const titleObj = parsedData.find((item) => item.heading === "Title");
       const title = titleObj ? titleObj.description : null;
       let storyId = id;
+      let story;
       if (title) {
         if (!id) {
-          const story = await prisma.story.create({
+          story = await prisma.story.create({
             data: {
               title: title,
               userId: req.user.userId,
               userPrompt: title,
+              imageUrl: [],
             },
           });
           storyId = story.id;
-          console.log(story.id);
+        } else {
+          story = await prisma.story.update({
+            where: {
+              id,
+            },
+            data: {
+              title: title,
+              userPrompt: title,
+            },
+          });
         }
       }
-      console.log(storyId, "storyID");
-      return res.status(200).json({ data: parsedData, id: storyId });
+
+      return res.status(200).json({ data: parsedData, id: storyId, story });
+    }
+
+    if (req.method === "GET") {
+      console.log(req.query);
+      return res.status(200).json({ heooL: "hello" });
     }
   } catch (error) {
     return res.json({ message: error.message });

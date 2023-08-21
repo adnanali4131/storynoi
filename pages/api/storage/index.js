@@ -18,7 +18,6 @@ export default async function handler(req, res) {
         })
       );
       const imageUrl = `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${imageKey}`;
-      console.log(id, "if");
       const story = await prisma.story.findFirst({
         where: {
           id,
@@ -29,15 +28,6 @@ export default async function handler(req, res) {
           heading,
           url: imageUrl,
         });
-        // story.imageUrl.length > 0
-        //   ? story.imageUrl.map((el) => {
-        //       if (el.heading === heading) {
-        //         return { heading: el.heading, url: imageUrl };
-        //       }
-        //       return { heading: heading, url: imageUrl };
-        //     })
-        //   : [{ heading: heading, url: imageUrl }];
-
         await prisma.story.update({
           where: {
             id,

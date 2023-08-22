@@ -6,6 +6,7 @@ import "@/styles/stories/index.css";
 import overlay1 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay2 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay4 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-5.png";
+import overlay5 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-2.png";
 import Header from "@/components/layout/Header";
 import SendIcon from "@/assets/stories/icons/send.svg";
 import Lottie from "react-lottie";
@@ -19,6 +20,7 @@ import Cartoon from "@/assets/stories/icons/cartoon.svg";
 import Anime from "@/assets/stories/icons/anime.svg";
 import Art from "@/assets/stories/icons/art.svg";
 import Fantasy from "@/assets/stories/icons/fantasy.svg";
+import Close from "@/assets/stories/icons/close.svg";
 const selectList = [
   {
     id: 1,
@@ -57,6 +59,11 @@ const Page = ({ params }) => {
   const [printModal, setPrintModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState(selectList[3]);
+  const [downloadModal, setDownloadModal] = useState(false);
+
+  const toggleDownloadModal = () => {
+    setDownloadModal(!downloadModal);
+  };
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -95,6 +102,9 @@ const Page = ({ params }) => {
           imageText: "No image generated yet!",
         };
       });
+      if (res.story && res.story.imageUrl && res.story.imageUrl.length > 6) {
+        setPrintModal(true);
+      }
       setData(formattedState);
       setConversation((curr) => [
         ...curr,
@@ -322,7 +332,6 @@ const Page = ({ params }) => {
                           <button
                             className="w-full p-2 rounded-lg bg-crayola-sky-blue"
                             onClick={() => {
-                              console.log("trigger");
                               setPrefChangesModal(true);
                             }}
                           >
@@ -339,7 +348,12 @@ const Page = ({ params }) => {
                               onBlur={() => setPrefChangesModal(false)}
                               onChange={(e) => setStoryUpdates(e.target.value)}
                             />
-                            <button className="p-[10px] rounded-lg bg-crayola-sky-blue">
+                            <button
+                              className="p-[10px] rounded-lg bg-crayola-sky-blue"
+                              onClick={async () =>
+                                await createStory(storyUpdates)
+                              }
+                            >
                               <Image src={SendIcon} alt={"send-icon"} />
                             </button>
                           </div>
@@ -359,7 +373,7 @@ const Page = ({ params }) => {
                       <div className="flex flex-1">
                         <button
                           className="w-full p-2 rounded-lg bg-crayola-sky-blue"
-                          onClick={async () => await generateAndDownloadPDF()}
+                          onClick={() => setDownloadModal(true)}
                         >
                           Download ebook
                         </button>
@@ -379,7 +393,12 @@ const Page = ({ params }) => {
           </div>
         </div>
       </section>
-      <Modal toggleModal={toggleModal} isModalOpen={isModalOpen}>
+      <Modal
+        toggleModal={toggleModal}
+        isModalOpen={isModalOpen}
+        background="bg-black"
+        width={"400px"}
+      >
         <div className="flex flex-col items-center justify-center w-full gap-5">
           <Select
             selected={selectedGenre}
@@ -396,6 +415,48 @@ const Page = ({ params }) => {
           >
             Generate
           </button>
+        </div>
+      </Modal>
+      <Modal
+        toggleModal={toggleDownloadModal}
+        isModalOpen={downloadModal}
+        background="bg-[#FF8E00CC]"
+        width={"60%"}
+      >
+        <Image
+          src={Close}
+          alt="cross"
+          width={15}
+          className="absolute cursor-pointer right-6 top-6"
+          onClick={() => setDownloadModal(false)}
+        />
+        <Image
+          src={overlay2}
+          alt={"bg-overlay-modal-2"}
+          width={80}
+          className="absolute right-0 z-10 m-0 bottom-5"
+        />
+        <Image
+          src={overlay5}
+          alt={"bg-overlay-modal-5"}
+          width={80}
+          className="absolute top-0 z-10 m-[0] left-5"
+        />
+        <div className="flex flex-col items-center justify-center w-full gap-10 py-24">
+          <h1 className="text-3xl font-normal">
+            Are you sure to download ebook
+          </h1>
+          <div className="flex justify-between gap-3">
+            <button
+              className="px-5 py-2 text-sm font-medium text-black rounded-lg shadow outline-none bg-crayola-sky-blue"
+              onClick={async () => await generateAndDownloadPDF()}
+            >
+              Download with watermark
+            </button>
+            <button className="px-5 py-2 text-sm font-medium text-white rounded-lg shadow outline-none bg-dark-orange">
+              Download without Watermark
+            </button>
+          </div>
         </div>
       </Modal>
     </div>

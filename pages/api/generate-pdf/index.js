@@ -6,7 +6,10 @@ export default async function handler(req, res) {
     let pageContent = "";
 
     for (let i = 0; i < storyContent.length; i++) {
-      if (storyContent[i].heading !== "Summary")
+      if (
+        storyContent[i].heading !== "Summary" &&
+        storyContent[i].heading !== "Discussions"
+      )
         pageContent +=
           storyContent[i].image && storyContent[i].image.length > 0
             ? `<div

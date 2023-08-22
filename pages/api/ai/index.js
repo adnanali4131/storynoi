@@ -1,6 +1,7 @@
 import authenticateJWT from "@/middleware";
 const { Configuration, OpenAIApi } = require("openai");
 import { PrismaClient } from "@prisma/client";
+import authenticationHelper from "@/lib/helper/authentication";
 const prisma = new PrismaClient();
 
 const config = new Configuration({
@@ -41,8 +42,17 @@ const handler = async (req, res) => {
         parsedData && parsedData.find((item) => item.heading === "Title");
       const title = titleObj ? titleObj.description : null;
       let storyId = id;
+      let user = authenticationHelper(req);
+
       let story;
-      if (title) {
+      if (!user) {
+        story = {
+          title: title,
+          userPrompt: title,
+          imageUrl: [],
+        };
+      }
+      if (title && user) {
         if (!id) {
           story = await prisma.story.create({
             data: {
@@ -52,7 +62,6 @@ const handler = async (req, res) => {
               imageUrl: [],
             },
           });
-          console.log(story, "titile");
           storyId = story.id;
         } else {
           story = await prisma.story.update({
@@ -74,4 +83,4 @@ const handler = async (req, res) => {
   }
 };
 
-export default authenticateJWT(handler);
+export default handler;

@@ -187,6 +187,13 @@ const Page = ({ params }) => {
               updateImageUrl
             );
             setData([...stories]);
+            if (
+              res.story &&
+              res.story.imageUrl &&
+              res.story.imageUrl.length > 6
+            ) {
+              setPrintModal(true);
+            }
           }
         } catch (err) {
           stories[i].imageText = "Failed to generate illustration";
@@ -195,9 +202,6 @@ const Page = ({ params }) => {
       }
     }
     setLoading(false);
-    if (res.story && res.story.imageUrl && res.story.imageUrl.length > 6) {
-      setPrintModal(true);
-    }
   };
   function storeImgToS3(storyObj, base64, updateImageUrl) {
     fetch("/api/storage", {
@@ -430,7 +434,7 @@ const Page = ({ params }) => {
         toggleModal={toggleModal}
         isModalOpen={isModalOpen}
         background="bg-black"
-        width={"400px"}
+        width="400px"
       >
         <div className="flex flex-col items-center justify-center w-full gap-5">
           <Select
@@ -454,7 +458,7 @@ const Page = ({ params }) => {
         toggleModal={toggleDownloadModal}
         isModalOpen={downloadModal}
         background="bg-[#FF8E00CC]"
-        width={"60%"}
+        width="60%"
       >
         <Image
           src={Close}

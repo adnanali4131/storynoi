@@ -1,5 +1,4 @@
 import puppeteer from "puppeteer";
-
 export default async function handler(req, res) {
   const { storyContent } = JSON.parse(req.body);
   const browser = await puppeteer.launch();
@@ -12,16 +11,18 @@ export default async function handler(req, res) {
           storyContent[i].image && storyContent[i].image.length > 0
             ? `<div
           key={${storyContent[i].heading}}
-          style="display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always"
+          style="display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always; position:relative"
         >
+        <img src="https://storynoi.s3.us-east-2.amazonaws.com/watermark.png" alt="watermark" style="position:fixed; width:100vw; height:100vh;z-index:100" />
           <img src="${storyContent[i].image}" alt="${
                 storyContent[i].heading
               }" style="width:100px, height:100px" />
         </div>
         <div
       key={${storyContent[i].heading}}
-      style="display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always"
+      style="display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always; position:relative;"
     >
+    <img src="https://storynoi.s3.us-east-2.amazonaws.com/watermark.png" alt="watermark" style="position:fixed; width:100vw; height:100vh; z-index:100" />
     <div style="font-family: 'Noto Sans Symbols' , sans-serif ;width:75%;justify-content:center; align-items:center; flex-direction:column; display:flex;">
     ${
       ["Title", "Moral"].includes(storyContent[i].heading)
@@ -37,8 +38,9 @@ export default async function handler(req, res) {
             : `<div
       key={${storyContent[i].heading}}
       style="font-family: 'Noto Sans Symbols', sans-serif;
-      display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always"
+      display:flex; height:100%; width:100%; justify-content:center; align-items:center; flex-direction:column; page-break-after:always; position:relative"
     >
+    <img src="https://storynoi.s3.us-east-2.amazonaws.com/watermark.png" alt="watermark" style="position:fixed; width:100vw; height:100vh;z-index:100" />
       <div style="width:75%;justify-content:center; align-items:center; flex-direction:column; display:flex;">
       
       ${

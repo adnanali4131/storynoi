@@ -10,7 +10,7 @@ import Header from "@/components/layout/Header";
 import SendIcon from "@/assets/stories/icons/send.svg";
 import Lottie from "react-lottie";
 import * as animationData from "@/assets/stories/book-loader.json";
-import { SUMMARY } from "@/constants/index";
+import { SUMMARY, DISCUSSION } from "@/constants/index";
 import downloadImage from "@/assets/stories/download.svg";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Modal from "@/components/global/modal/Modal";
@@ -19,6 +19,7 @@ import Cartoon from "@/assets/stories/icons/cartoon.svg";
 import Anime from "@/assets/stories/icons/anime.svg";
 import Art from "@/assets/stories/icons/art.svg";
 import Fantasy from "@/assets/stories/icons/fantasy.svg";
+import DiscussionsComponent from "@/components/landing/discussions";
 const selectList = [
   {
     id: 1,
@@ -57,6 +58,8 @@ const Page = ({ params }) => {
   const [printModal, setPrintModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState(selectList[3]);
+  const [storyData, setStoryData] = useState({});
+
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -79,6 +82,7 @@ const Page = ({ params }) => {
     ).json();
 
     if (res) {
+      setStoryData(res);
       const formattedState = res.data.map((el) => {
         const url =
           (res.story.imageUrl &&
@@ -214,6 +218,10 @@ const Page = ({ params }) => {
     }
   }
 
+  const imageUrls = storyData?.story?.imageUrl?.map(imgObj => imgObj.url);
+  console.log("Story Data:", storyData);
+  console.log("Image URLs:", imageUrls);
+
   return (
     <div>
       <section className="relative overflow-hidden hero-section h-[100vh] bg-mustard">
@@ -247,53 +255,50 @@ const Page = ({ params }) => {
                   <div className="flex flex-col h-full px-5 py-2 overflow-auto content-container gap-9">
                     {data.length > 0 &&
                       !loading &&
-                      data.map(
-                        (el) =>
-                          el.heading !== SUMMARY && (
-                            <>
-                              <div
-                                key={el.heading}
-                                className="flex items-center gap-5 text-black bg-white shadow-sm rounded-xl"
-                              >
-                                <div className="w-full flex-1 h-[500px] flex overflow-hidden  justify-center items-center flex-col shadow-[10px 4px 12px 0px #0000001F]">
-                                  {el.image ? (
-                                    <Image
-                                      src={el.image}
-                                      alt={el.heading}
-                                      width={100}
-                                      height={100}
-                                      className="w-[100%]"
-                                    />
-                                  ) : (
-                                    <div className="flex items-center justify-center gap-4 flex-col w-full h-[100%]">
-                                      <Image
-                                        src={downloadImage}
-                                        alt="download"
-                                      />
-                                      {el.imageText.length > 0 ? (
-                                        <p className="text-lg leading-7 text-center ">
-                                          {el.imageText}
-                                        </p>
-                                      ) : null}
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="h-[500px] items-center p-4 flex justify-center flex-col">
-                                    {["Title", "Moral"].includes(el.heading) ? (
-                                      <h2 className="text-[24px] font-semibold">
-                                        {el.heading}
-                                      </h2>
+                      data.map((el) => {
+                        if (el.heading !== SUMMARY && el.heading !== DISCUSSION) {
+                          return (
+                            <div
+                              key={el.heading}
+                              className="flex items-center gap-5 text-black bg-white shadow-sm rounded-xl"
+                            >
+                              <div className="w-full flex-1 h-[500px] flex overflow-hidden  justify-center items-center flex-col shadow-[10px 4px 12px 0px #0000001F]">
+                                {el.image ? (
+                                  <Image
+                                    src={el.image}
+                                    alt={el.heading}
+                                    width={100}
+                                    height={100}
+                                    className="w-[100%]"
+                                  />
+                                ) : (
+                                  <div className="flex items-center justify-center gap-4 flex-col w-full h-[100%]">
+                                    <Image src={downloadImage} alt="download" />
+                                    {el.imageText.length > 0 ? (
+                                      <p className="text-lg leading-7 text-center ">
+                                        {el.imageText}
+                                      </p>
                                     ) : null}
-                                    <p className="text-lg leading-7 text-center">
-                                      {el.description}
-                                    </p>
                                   </div>
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <div className="h-[500px] items-center p-4 flex justify-center flex-col">
+                                  {["Title", "Moral"].includes(el.heading) ? (
+                                    <h2 className="text-[24px] font-semibold">{el.heading}</h2>
+                                  ) : null}
+                                  <p className="text-lg leading-7 text-center">
+                                    {el.description}
+                                  </p>
                                 </div>
                               </div>
-                            </>
-                          )
-                      )}
+                            </div>
+                          );
+                        }
+                      })}
+
+                    {data.find(item => item.heading === DISCUSSION) &&
+                      <DiscussionsComponent discussion={data.find(item => item.heading === DISCUSSION)} imageUrls={data.map(story => story.image)} />}
                     {loading && !data.length && (
                       <div className="flex flex-col w-full h-[100%]">
                         <Lottie
@@ -339,16 +344,15 @@ const Page = ({ params }) => {
                               onBlur={() => setPrefChangesModal(false)}
                               onChange={(e) => setStoryUpdates(e.target.value)}
                             />
-                            <button className="p-[10px] rounded-lg bg-crayola-sky-blue">
+                            <button className="p-[10px] rounded-lg bg-crayola-sky-blue" onClick={async () => await createStory(storyUpdates)}>
                               <Image src={SendIcon} alt={"send-icon"} />
                             </button>
                           </div>
                         )}
                       </div>
                       <button
-                        className={` p-2 text-white rounded-lg bg-dark-orange ${
-                          !prefChangesModal && "flex-1"
-                        }`}
+                        className={` p-2 text-white rounded-lg bg-dark-orange ${!prefChangesModal && "flex-1"
+                          }`}
                         onClick={() => (data.length > 0 ? toggleModal() : null)}
                       >
                         Generate pics
@@ -365,9 +369,8 @@ const Page = ({ params }) => {
                         </button>
                       </div>
                       <button
-                        className={` p-2 text-white rounded-lg bg-dark-orange ${
-                          !prefChangesModal && "flex-1"
-                        }`}
+                        className={` p-2 text-white rounded-lg bg-dark-orange ${!prefChangesModal && "flex-1"
+                          }`}
                       >
                         Print the book
                       </button>

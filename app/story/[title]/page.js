@@ -1,19 +1,24 @@
 "use client";
 import React, { useEffect, useState } from "react";
-
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import Lottie from "react-lottie";
 import Image from "next/image";
+import { v4 as uuidv4 } from "uuid";
+
 import "@/styles/stories/index.css";
+import LocalStorage from "@/lib/integration/localstorage";
+
 import overlay1 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay2 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay4 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-5.png";
 import overlay5 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-2.png";
 import Header from "@/components/layout/Header";
 import SendIcon from "@/assets/stories/icons/send.svg";
-import Lottie from "react-lottie";
+
 import * as animationData from "@/assets/stories/book-loader.json";
 import { SUMMARY } from "@/constants/index";
 import downloadImage from "@/assets/stories/download.svg";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+
 import Modal from "@/components/global/modal/Modal";
 import Select from "@/components/global/select/Select";
 import Cartoon from "@/assets/stories/icons/cartoon.svg";
@@ -21,6 +26,9 @@ import Anime from "@/assets/stories/icons/anime.svg";
 import Art from "@/assets/stories/icons/art.svg";
 import Fantasy from "@/assets/stories/icons/fantasy.svg";
 import Close from "@/assets/stories/icons/close.svg";
+
+const isLoggedIn = false;
+
 const selectList = [
   {
     id: 1,
@@ -60,14 +68,15 @@ const Page = ({ params }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState(selectList[3]);
   const [downloadModal, setDownloadModal] = useState(false);
+  const [conversation, setConversation] = useState([]);
 
+  const storage = new LocalStorage();
   const toggleDownloadModal = () => {
     setDownloadModal(!downloadModal);
   };
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
-  const [conversation, setConversation] = useState([]);
 
   const createStory = async (content) => {
     setData([]);
@@ -87,14 +96,20 @@ const Page = ({ params }) => {
 
     if (res) {
       const formattedState = res.data.map((el) => {
-        const url =
+        let url =
           (res.story.imageUrl &&
             res.story.imageUrl.length > 0 &&
             res.story.imageUrl?.find(
               (storyData) => storyData.heading === el.heading
             )) ||
           "";
-
+        if (!isLoggedIn) {
+          const fetchStorageImage = storage.get("img");
+          if (fetchStorageImage) {
+            if (fetchStorageImage.heading === el.heading)
+              url = fetchStorageImage;
+          }
+        }
         return {
           heading: el.heading,
           description: el.description,
@@ -117,6 +132,12 @@ const Page = ({ params }) => {
 
   useEffect(() => {
     createStory(params.title);
+    if (!isLoggedIn) {
+      if (!storage.get("userId")) {
+        const userId = uuidv4();
+        storage.set("userId", userId);
+      }
+    }
   }, []);
 
   const defaultOptions = {
@@ -129,8 +150,8 @@ const Page = ({ params }) => {
   };
   const fetchImages = async (storyData) => {
     const stories = [...storyData];
-    const length = storyData?.length;
-    stories.forEach((story) => {
+    const length = isLoggedIn ? storyData?.length : 1;
+    stories.forEach((story, index) => {
       story.imageText = "Generating illustration...";
     });
     setData([...stories]);
@@ -174,7 +195,9 @@ const Page = ({ params }) => {
       }
     }
     setLoading(false);
-    setPrintModal(true);
+    if (res.story && res.story.imageUrl && res.story.imageUrl.length > 6) {
+      setPrintModal(true);
+    }
   };
   function storeImgToS3(storyObj, base64, updateImageUrl) {
     fetch("/api/storage", {
@@ -204,6 +227,10 @@ const Page = ({ params }) => {
         return story;
       } else return story;
     });
+    if (!isLoggedIn) {
+      storage.set("img", { heading: storyObj.heading, url: res.url });
+    }
+
     setData(storyState);
   }
   async function generateAndDownloadPDF() {
@@ -354,7 +381,13 @@ const Page = ({ params }) => {
                                 await createStory(storyUpdates)
                               }
                             >
-                              <Image src={SendIcon} alt={"send-icon"} />
+                              <Image
+                                src={SendIcon}
+                                alt={"send-icon"}
+                                onClick={async () =>
+                                  await createStory(storyUpdates)
+                                }
+                              />
                             </button>
                           </div>
                         )}

@@ -1,7 +1,6 @@
 import "./globals.css";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"] });
+import { Plus_Jakarta_Sans } from "next/font/google";
+import { AuthContextProvider } from "@/components/contexts/Auth";
 const jakarta_sans = Plus_Jakarta_Sans({ subsets: ["latin"] });
 export const metadata = {
   title: "Storynoi | landing page",
@@ -11,7 +10,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={jakarta_sans.className}>{children}</body>
+      <body className={jakarta_sans.className}>
+        <AuthContextProvider>{children}</AuthContextProvider>
+      </body>
     </html>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Lottie from "react-lottie";
 import Image from "next/image";
@@ -26,9 +26,9 @@ import Anime from "@/assets/stories/icons/anime.svg";
 import Art from "@/assets/stories/icons/art.svg";
 import Fantasy from "@/assets/stories/icons/fantasy.svg";
 import Close from "@/assets/stories/icons/close.svg";
-
-const isLoggedIn = false;
-
+import Login from "@/components/login/Login";
+import { AuthContext } from "@/components/contexts/Auth";
+import jwt_decode from "jwt-decode";
 const selectList = [
   {
     id: 1,
@@ -68,14 +68,18 @@ const Page = ({ params }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState(selectList[3]);
   const [downloadModal, setDownloadModal] = useState(false);
+  const [loginModal, setLoginModal] = useState(false);
   const [conversation, setConversation] = useState([]);
-
+  const { state, dispatch } = useContext(AuthContext);
   const storage = new LocalStorage();
   const toggleDownloadModal = () => {
     setDownloadModal(!downloadModal);
   };
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
+  };
+  const toggleLoginModal = () => {
+    setLoginModal(!loginModal);
   };
 
   const createStory = async (content) => {
@@ -103,10 +107,13 @@ const Page = ({ params }) => {
               (storyData) => storyData.heading === el.heading
             )) ||
           "";
-        if (!isLoggedIn) {
+        if (!state.isAuthenticated) {
           const fetchStorageImage = storage.get("img");
           if (fetchStorageImage) {
-            if (fetchStorageImage.heading === el.heading)
+            if (
+              fetchStorageImage.heading === el.heading &&
+              params.title === fetchStorageImage.title
+            )
               url = fetchStorageImage;
           }
         }
@@ -132,7 +139,7 @@ const Page = ({ params }) => {
 
   useEffect(() => {
     createStory(params.title);
-    if (!isLoggedIn) {
+    if (!state.isAuthenticated) {
       if (!storage.get("userId")) {
         const userId = uuidv4();
         storage.set("userId", userId);
@@ -150,7 +157,7 @@ const Page = ({ params }) => {
   };
   const fetchImages = async (storyData) => {
     const stories = [...storyData];
-    const length = isLoggedIn ? storyData?.length : 1;
+    const length = state.isAuthenticated ? storyData?.length : 1;
     stories.forEach((story, index) => {
       story.imageText = "Generating illustration...";
     });
@@ -187,6 +194,7 @@ const Page = ({ params }) => {
               updateImageUrl
             );
             setData([...stories]);
+            setLoginModal(true);
             if (
               res.story &&
               res.story.imageUrl &&
@@ -231,8 +239,12 @@ const Page = ({ params }) => {
         return story;
       } else return story;
     });
-    if (!isLoggedIn) {
-      storage.set("img", { heading: storyObj.heading, url: res.url });
+    if (!state.isAuthenticated) {
+      storage.set("img", {
+        heading: storyObj.heading,
+        url: res.url,
+        title: params.title,
+      });
     }
 
     setData(storyState);
@@ -252,8 +264,59 @@ const Page = ({ params }) => {
       link.href = url;
       link.download = "story.pdf";
       link.click();
+      setDownloadModal(false);
     }
   }
+  useEffect(() => {
+    // Check for token
+    if (storage.get("jwtToken")) {
+      // Set auth token header auth
+      // setAuthToken(localStorage.jwtToken);
+      // Decode token and get user info and exp
+      const decoded = jwt_decode(storage.get("jwtToken"));
+      // Set user and isAuthenticated
+      dispatch({ type: "SET_CURRENT_USER", payload: decoded });
+
+      // Check for expired token
+      const currentTime = Date.now() / 1000;
+      if (decoded.exp < currentTime) {
+        dispatch({ type: "USER_LOGOUT" });
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (data) {
+      const length = data
+        .map((story) => story.image)
+        .filter(
+          (img) => img !== null && img !== "" && img !== undefined
+        ).length;
+      if (length > 5) {
+        setPrintModal(true);
+      }
+    }
+  }, [data]);
+
+  const handleLoginCb = async () => {
+    const token = storage.get("jwtToken");
+    if (token) {
+      const res = await (
+        await fetch("/api/story", {
+          method: "POST",
+          body: JSON.stringify({
+            title: params.title,
+          }),
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        })
+      ).json();
+      if (res) {
+        router.push(`${pathname}?id=${res.id}`);
+      }
+    }
+  };
 
   return (
     <div>
@@ -435,6 +498,8 @@ const Page = ({ params }) => {
         isModalOpen={isModalOpen}
         background="bg-black"
         width="400px"
+        padding="p-6"
+        id="genreModal"
       >
         <div className="flex flex-col items-center justify-center w-full gap-5">
           <Select
@@ -459,6 +524,8 @@ const Page = ({ params }) => {
         isModalOpen={downloadModal}
         background="bg-[#FF8E00CC]"
         width="60%"
+        padding="p-6"
+        id="downloadModal"
       >
         <Image
           src={Close}
@@ -496,6 +563,18 @@ const Page = ({ params }) => {
           </div>
         </div>
       </Modal>
+      {state.isAuthenticated !== true ? (
+        <Modal
+          toggleModal={() => setLoginModal(true)}
+          isModalOpen={loginModal}
+          background="bg-black"
+          width="30%"
+          padding="p-0"
+          id="loginModal"
+        >
+          <Login callback={handleLoginCb} />
+        </Modal>
+      ) : null}
     </div>
   );
 };

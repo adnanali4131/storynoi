@@ -45,14 +45,14 @@ const handler = async (req, res) => {
       let user = authenticationHelper(req);
 
       let story;
-      if (!user) {
+      if (!user && !id) {
         story = {
           title: title,
           userPrompt: title,
           imageUrl: [],
         };
       }
-      if (title && user) {
+      if ((title && user) || (title && id)) {
         if (!id) {
           story = await prisma.story.create({
             data: {

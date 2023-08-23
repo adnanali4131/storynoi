@@ -22,6 +22,7 @@ module.exports = {
         "dark-orange": "#FF8E00",
         "alice-blue": "#FDF7F2",
         cultured: "#F6F6F6",
+        gray: "#F2F8FD"
       },
       colors: {
         mustard: "#FEE051",

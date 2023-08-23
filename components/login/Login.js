@@ -9,7 +9,7 @@ import Show from "@/assets/auth/icons/show.svg";
 import LocalStorage from "@/lib/integration/localstorage";
 import jwt_decode from "jwt-decode";
 import { AuthContext } from "../contexts/Auth";
-const Login = ({ width, callback }) => {
+const Login = ({ width, callback, signUp }) => {
   const { state, dispatch } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -113,7 +113,16 @@ const Login = ({ width, callback }) => {
           <div className="flex justify-center mt-20">
             <p className="text-[15px]">
               Don’t have an account?{" "}
-              <span className="text-dark-orange">Signup</span>{" "}
+              <span
+                className="cursor-pointer text-dark-orange"
+                onClick={() => {
+                  if (signUp) {
+                    signUp();
+                  }
+                }}
+              >
+                Signup
+              </span>{" "}
             </p>
           </div>
         </div>

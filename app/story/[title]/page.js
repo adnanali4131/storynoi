@@ -27,6 +27,7 @@ import Art from "@/assets/stories/icons/art.svg";
 import Fantasy from "@/assets/stories/icons/fantasy.svg";
 import Close from "@/assets/stories/icons/close.svg";
 import Login from "@/components/login/Login";
+import Signup from "@/components/signup/Signup";
 import { AuthContext } from "@/components/contexts/Auth";
 import jwt_decode from "jwt-decode";
 import DiscussionsComponent from "@/components/landing/discussions";
@@ -71,6 +72,7 @@ const Page = ({ params }) => {
   const [selectedGenre, setSelectedGenre] = useState(selectList[3]);
   const [downloadModal, setDownloadModal] = useState(false);
   const [loginModal, setLoginModal] = useState(false);
+  const [signupModal, setSignupModal] = useState(false);
   const [conversation, setConversation] = useState([]);
   const { state, dispatch } = useContext(AuthContext);
   const storage = new LocalStorage();
@@ -84,11 +86,22 @@ const Page = ({ params }) => {
     setLoginModal(!loginModal);
   };
 
+  const toggleSignupModal = () => {
+    setSignupModal(!signupModal);
+  };
+
   const createStory = async (content) => {
     setData([]);
     setLoading(true);
     setLoadingText("Gathering Fairy Tale for Stories... ✨📜");
     setConversation((curr) => [...curr, { role: "user", content }]);
+    const token = storage.get("jwtToken");
+    let headers = {
+      authorization: "",
+    };
+    if (token) {
+      headers.authorization = `Bearer ${token}`;
+    }
 
     const res = await (
       await fetch("/api/ai", {
@@ -97,13 +110,15 @@ const Page = ({ params }) => {
           messages: [...conversation, { role: "user", content }],
           id: searchParams.get("id"),
         }),
+        headers,
       })
     ).json();
 
     if (res) {
       const formattedState = res.data.map((el) => {
         let url =
-          (res.story.imageUrl &&
+          (res.story &&
+            res.story.imageUrl &&
             res.story.imageUrl.length > 0 &&
             res.story.imageUrl?.find(
               (storyData) => storyData.heading === el.heading
@@ -315,6 +330,7 @@ const Page = ({ params }) => {
         })
       ).json();
       if (res) {
+        toggleLoginModal();
         router.push(`${pathname}?id=${res.id}`);
       }
     }
@@ -449,22 +465,16 @@ const Page = ({ params }) => {
                               placeholder="Share your idea to start the book creation"
                               type="text"
                               value={storyUpdates}
-                              onBlur={() => setPrefChangesModal(false)}
                               onChange={(e) => setStoryUpdates(e.target.value)}
                             />
                             <button
                               className="p-[10px] rounded-lg bg-crayola-sky-blue"
-                              onClick={async () =>
-                                await createStory(storyUpdates)
-                              }
+                              onClick={async (event) => {
+                                event.stopPropagation();
+                                await createStory(storyUpdates);
+                              }}
                             >
-                              <Image
-                                src={SendIcon}
-                                alt={"send-icon"}
-                                onClick={async () =>
-                                  await createStory(storyUpdates)
-                                }
-                              />
+                              <Image src={SendIcon} alt={"send-icon"} />
                             </button>
                           </div>
                         )}
@@ -480,16 +490,15 @@ const Page = ({ params }) => {
                     </div>
                   ) : (
                     <div className="bg-white p-2 w-[100%] rounded-lg flex gap-2 justify-between">
-                      <div className="flex flex-1">
-                        <button
-                          className="w-full p-2 rounded-lg bg-crayola-sky-blue"
-                          onClick={() => setDownloadModal(true)}
-                        >
-                          Download ebook
-                        </button>
-                      </div>
                       <button
-                        className={` p-2 text-white rounded-lg bg-dark-orange ${
+                        className="flex-1 p-2 rounded-lg bg-crayola-sky-blue"
+                        onClick={() => setDownloadModal(true)}
+                      >
+                        Download ebook
+                      </button>
+
+                      <button
+                        className={`flex-1 p-2 text-white rounded-lg bg-dark-orange ${
                           !prefChangesModal && "flex-1"
                         }`}
                       >
@@ -582,7 +591,30 @@ const Page = ({ params }) => {
           padding="p-0"
           id="loginModal"
         >
-          <Login callback={handleLoginCb} />
+          <Login
+            callback={handleLoginCb}
+            signUp={() => {
+              setSignupModal(true);
+              setLoginModal(false);
+            }}
+          />
+        </Modal>
+      ) : null}
+      {state.isAuthenticated !== true ? (
+        <Modal
+          toggleModal={() => setSignupModal(true)}
+          isModalOpen={signupModal}
+          background="bg-black"
+          width="30%"
+          padding="p-0"
+          id="signupModal"
+        >
+          <Signup
+            callBack={() => {
+              setSignupModal(false);
+              setLoginModal(true);
+            }}
+          />
         </Modal>
       ) : null}
     </div>

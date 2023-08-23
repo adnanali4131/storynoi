@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useFormik } from 'formik';
+import { useFormik } from "formik";
 import Image from "next/image";
 import Hidden from "@/assets/auth/icons/hidden.svg";
 import Google from "@/assets/auth/icons/google.svg";
@@ -8,37 +8,38 @@ import Show from "@/assets/auth/icons/show.svg";
 import { ValidationSchema } from "@/assets/yup/schema";
 import { useRouter } from "next/navigation";
 
-const Signup = ({ width }) => {
+const Signup = ({ width, callBack }) => {
   const router = useRouter();
   const [hidden, setHidden] = useState(true);
 
   const onFormSubmit = async (userData) => {
-    console.log(userData)
-    const response = await fetch('/api/signup', {
-      method: 'POST',
+    const response = await fetch("/api/signup", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(userData),
     });
 
     const data = await response.json();
     if (data.message) {
-      router.push('login');
+      if (callBack) {
+        callBack();
+      } else router.push("login");
     } else if (data.error) {
       alert(data.error);
     }
-  }
+  };
 
   const formik = useFormik({
     initialValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
     },
     validationSchema: ValidationSchema,
-    onSubmit: values => {
+    onSubmit: (values) => {
       onFormSubmit(values);
     },
   });
@@ -48,8 +49,8 @@ const Signup = ({ width }) => {
       <div className="text-[30px] font-medium">
         <h1 className="mb-[20px]">Sign Up</h1>
         <form onSubmit={formik.handleSubmit} className="flex flex-col gap-5">
-          <div className="flex flex-col  overflow-hidden bg-white ">
-            <div className="flex items-center justify-between gap-3 w-full border  rounded-xl custom-input px-4">
+          <div className="flex flex-col overflow-hidden bg-white ">
+            <div className="flex items-center justify-between w-full gap-3 px-4 border rounded-xl custom-input">
               <input
                 type="text"
                 name="firstName"
@@ -61,12 +62,14 @@ const Signup = ({ width }) => {
               />
             </div>
             {formik.touched.firstName && formik.errors.firstName ? (
-              <div className="text-red-500 text-[12px] mt-1">{formik.errors.firstName}</div>
+              <div className="text-red-500 text-[12px] mt-1">
+                {formik.errors.firstName}
+              </div>
             ) : null}
           </div>
 
-          <div className="flex flex-col overflow-hidden bg-white  custom-input">
-            <div className="flex items-center justify-between border  rounded-xl gap-3 w-full px-4">
+          <div className="flex flex-col overflow-hidden bg-white custom-input">
+            <div className="flex items-center justify-between w-full gap-3 px-4 border rounded-xl">
               <input
                 type="text"
                 name="lastName"
@@ -78,11 +81,13 @@ const Signup = ({ width }) => {
               />
             </div>
             {formik.touched.lastName && formik.errors.lastName ? (
-              <div className="text-red-500 text-[12px] mt-1">{formik.errors.lastName}</div>
+              <div className="text-red-500 text-[12px] mt-1">
+                {formik.errors.lastName}
+              </div>
             ) : null}
           </div>
           <div className="flex flex-col overflow-hidden bg-white custom-input">
-            <div className="flex items-center justify-between gap-3 w-full border rounded-xl px-4">
+            <div className="flex items-center justify-between w-full gap-3 px-4 border rounded-xl">
               <input
                 type="email"
                 name="email"
@@ -94,12 +99,14 @@ const Signup = ({ width }) => {
               />
             </div>
             {formik.touched.email && formik.errors.email ? (
-              <div className="text-red-500 text-[12px] mt-1">{formik.errors.email}</div>
+              <div className="text-red-500 text-[12px] mt-1">
+                {formik.errors.email}
+              </div>
             ) : null}
           </div>
 
           <div className="flex flex-col overflow-hidden bg-white custom-input">
-            <div className="flex items-center justify-between gap-3 w-full border rounded-xl px-4">
+            <div className="flex items-center justify-between w-full gap-3 px-4 border rounded-xl">
               <div className="flex w-[90%] gap-3">
                 <input
                   type={hidden ? "password" : "text"}
@@ -121,12 +128,16 @@ const Signup = ({ width }) => {
               />
             </div>
             {formik.touched.password && formik.errors.password ? (
-              <div className="text-red-500 text-[12px] mt-1">{formik.errors.password}</div>
+              <div className="text-red-500 text-[12px] mt-1">
+                {formik.errors.password}
+              </div>
             ) : null}
           </div>
 
-
-          <button type="submit" className="text-white bg-dark-orange rounded-xl text-[16px] p-3">
+          <button
+            type="submit"
+            className="text-white bg-dark-orange rounded-xl text-[16px] p-3"
+          >
             Create Account
           </button>
           <div className="flex items-center justify-between">
@@ -151,4 +162,3 @@ const Signup = ({ width }) => {
 };
 
 export default Signup;
-

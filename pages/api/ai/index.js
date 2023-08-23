@@ -15,9 +15,10 @@ const handler = async (req, res) => {
   try {
     if (req.method === "POST") {
       const { messages, id } = JSON.parse(req.body);
-      let systemMessage = {
-        role: "system",
-        content: `You can only reply in JSON Format. You can only reply in below JSON Format.
+      let systemMessage = [
+        {
+          role: "system",
+          content: `You can only reply in JSON Format. You can only reply in below JSON Format.
           [
           {
             "heading": "heading for the heading in string format",
@@ -25,18 +26,26 @@ const handler = async (req, res) => {
           }
         ]
         You are a children's story writer. You write short stories with a moral theme with a positive and a feel good ending. The plot of the story is divided into specific heading. Please provide a story structure using the following headings: Title (heading key should be "Title" followed by description key to be title string), Plot, Inciting Incident, Rising Action, Dilemma, Climax, Denouement, Moral and Discussions (three bullet point in array formate these bullets add on index number of array and should be in question formate),  and a brief Summary having all the details which can easily understand by stability ai to generate images . The stories must be at-least 400 words. All stories need to be positive and have a happy ending. Don't mention adult content, religion.Please keep stories kids friendly and imaginative as much as possible.Avoid use of words 'punish' or adults hitting kids.Reply in the following JSON formatted response: `,
-      };
+        },
+      ];
 
       const response = await openAi.createChatCompletion({
-        model: "gpt-3.5-turbo",
-        messages: [systemMessage, ...messages],
+        model: "gpt-3.5-turbo-16k",
+        messages: [...systemMessage, ...messages],
       });
       const data =
         response.data.choices && response.data.choices[0]
           ? response.data.choices[0].message.content
           : "No response from OpenAI";
-
-      const parsedData = JSON.parse(data);
+      console.log(
+        response.data.choices &&
+          response.data.choices[0] &&
+          response.data.choices[0].message.content
+      );
+      let parsedData = JSON.parse(data);
+      if (parsedData && parsedData.data) {
+        parsedData = parsedData.data;
+      }
 
       const titleObj =
         parsedData && parsedData.find((item) => item.heading === "Title");
@@ -45,14 +54,14 @@ const handler = async (req, res) => {
       let user = authenticationHelper(req);
 
       let story;
-      if (!user) {
+      if (!user && id === "null" && id === null) {
         story = {
           title: title,
           userPrompt: title,
           imageUrl: [],
         };
       }
-      if (title && user) {
+      if ((title && Boolean(user)) || (title && id !== "null" && id !== null)) {
         if (!id) {
           story = await prisma.story.create({
             data: {

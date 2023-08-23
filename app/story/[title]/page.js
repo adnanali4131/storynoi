@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Lottie from "react-lottie";
 import Image from "next/image";
@@ -26,9 +26,11 @@ import Anime from "@/assets/stories/icons/anime.svg";
 import Art from "@/assets/stories/icons/art.svg";
 import Fantasy from "@/assets/stories/icons/fantasy.svg";
 import Close from "@/assets/stories/icons/close.svg";
+import Login from "@/components/login/Login";
+import Signup from "@/components/signup/Signup";
+import { AuthContext } from "@/components/contexts/Auth";
+import jwt_decode from "jwt-decode";
 import DiscussionsComponent from "@/components/landing/discussions";
-
-const isLoggedIn = false;
 
 const selectList = [
   {
@@ -69,8 +71,10 @@ const Page = ({ params }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState(selectList[3]);
   const [downloadModal, setDownloadModal] = useState(false);
+  const [loginModal, setLoginModal] = useState(false);
+  const [signupModal, setSignupModal] = useState(false);
   const [conversation, setConversation] = useState([]);
-
+  const { state, dispatch } = useContext(AuthContext);
   const storage = new LocalStorage();
   const toggleDownloadModal = () => {
     setDownloadModal(!downloadModal);
@@ -78,12 +82,26 @@ const Page = ({ params }) => {
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
   };
+  const toggleLoginModal = () => {
+    setLoginModal(!loginModal);
+  };
+
+  const toggleSignupModal = () => {
+    setSignupModal(!signupModal);
+  };
 
   const createStory = async (content) => {
     setData([]);
     setLoading(true);
     setLoadingText("Gathering Fairy Tale for Stories... ✨📜");
     setConversation((curr) => [...curr, { role: "user", content }]);
+    const token = storage.get("jwtToken");
+    let headers = {
+      authorization: "",
+    };
+    if (token) {
+      headers.authorization = `Bearer ${token}`;
+    }
 
     const res = await (
       await fetch("/api/ai", {
@@ -92,22 +110,27 @@ const Page = ({ params }) => {
           messages: [...conversation, { role: "user", content }],
           id: searchParams.get("id"),
         }),
+        headers,
       })
     ).json();
 
     if (res) {
       const formattedState = res.data.map((el) => {
         let url =
-          (res.story.imageUrl &&
+          (res.story &&
+            res.story.imageUrl &&
             res.story.imageUrl.length > 0 &&
             res.story.imageUrl?.find(
               (storyData) => storyData.heading === el.heading
             )) ||
           "";
-        if (!isLoggedIn) {
+        if (!state.isAuthenticated) {
           const fetchStorageImage = storage.get("img");
           if (fetchStorageImage) {
-            if (fetchStorageImage.heading === el.heading)
+            if (
+              fetchStorageImage.heading === el.heading &&
+              params.title === fetchStorageImage.title
+            )
               url = fetchStorageImage;
           }
         }
@@ -133,7 +156,7 @@ const Page = ({ params }) => {
 
   useEffect(() => {
     createStory(params.title);
-    if (!isLoggedIn) {
+    if (!state.isAuthenticated) {
       if (!storage.get("userId")) {
         const userId = uuidv4();
         storage.set("userId", userId);
@@ -151,7 +174,7 @@ const Page = ({ params }) => {
   };
   const fetchImages = async (storyData) => {
     const stories = [...storyData];
-    const length = isLoggedIn ? storyData?.length : 1;
+    const length = state.isAuthenticated ? storyData?.length : 1;
     stories.forEach((story, index) => {
       story.imageText = "Generating illustration...";
     });
@@ -188,6 +211,7 @@ const Page = ({ params }) => {
               updateImageUrl
             );
             setData([...stories]);
+            setLoginModal(true);
             if (
               res.story &&
               res.story.imageUrl &&
@@ -232,8 +256,12 @@ const Page = ({ params }) => {
         return story;
       } else return story;
     });
-    if (!isLoggedIn) {
-      storage.set("img", { heading: storyObj.heading, url: res.url });
+    if (!state.isAuthenticated) {
+      storage.set("img", {
+        heading: storyObj.heading,
+        url: res.url,
+        title: params.title,
+      });
     }
 
     setData(storyState);
@@ -253,8 +281,60 @@ const Page = ({ params }) => {
       link.href = url;
       link.download = "story.pdf";
       link.click();
+      setDownloadModal(false);
     }
   }
+  useEffect(() => {
+    // Check for token
+    if (storage.get("jwtToken")) {
+      // Set auth token header auth
+      // setAuthToken(localStorage.jwtToken);
+      // Decode token and get user info and exp
+      const decoded = jwt_decode(storage.get("jwtToken"));
+      // Set user and isAuthenticated
+      dispatch({ type: "SET_CURRENT_USER", payload: decoded });
+
+      // Check for expired token
+      const currentTime = Date.now() / 1000;
+      if (decoded.exp < currentTime) {
+        dispatch({ type: "USER_LOGOUT" });
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (data) {
+      const length = data
+        .map((story) => story.image)
+        .filter(
+          (img) => img !== null && img !== "" && img !== undefined
+        ).length;
+      if (length > 5) {
+        setPrintModal(true);
+      }
+    }
+  }, [data]);
+
+  const handleLoginCb = async () => {
+    const token = storage.get("jwtToken");
+    if (token) {
+      const res = await (
+        await fetch("/api/story", {
+          method: "POST",
+          body: JSON.stringify({
+            title: params.title,
+          }),
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        })
+      ).json();
+      if (res) {
+        toggleLoginModal();
+        router.push(`${pathname}?id=${res.id}`);
+      }
+    }
+  };
 
   return (
     <div>
@@ -290,7 +370,10 @@ const Page = ({ params }) => {
                     {data.length > 0 &&
                       !loading &&
                       data.map((el) => {
-                        if (el.heading !== SUMMARY && el.heading !== DISCUSSION) {
+                        if (
+                          el.heading !== SUMMARY &&
+                          el.heading !== DISCUSSION
+                        ) {
                           return (
                             <div
                               key={el.heading}
@@ -319,7 +402,9 @@ const Page = ({ params }) => {
                               <div className="flex-1">
                                 <div className="h-[500px] items-center p-4 flex justify-center flex-col">
                                   {["Title", "Moral"].includes(el.heading) ? (
-                                    <h2 className="text-[24px] font-semibold">{el.heading}</h2>
+                                    <h2 className="text-[24px] font-semibold">
+                                      {el.heading}
+                                    </h2>
                                   ) : null}
                                   <p className="text-lg leading-7 text-center">
                                     {el.description}
@@ -331,9 +416,14 @@ const Page = ({ params }) => {
                         }
                       })}
 
-                    {data.find(item => item.heading === DISCUSSION) &&
-                      <DiscussionsComponent discussion={data.find(item => item.heading === DISCUSSION)} imageUrls={data.map(story => story.image)} />
-                    }
+                    {data.find((item) => item.heading === DISCUSSION) && (
+                      <DiscussionsComponent
+                        discussion={data.find(
+                          (item) => item.heading === DISCUSSION
+                        )}
+                        imageUrls={data.map((story) => story.image)}
+                      />
+                    )}
                     {loading && !data.length && (
                       <div className="flex flex-col w-full h-[100%]">
                         <Lottie
@@ -375,29 +465,24 @@ const Page = ({ params }) => {
                               placeholder="Share your idea to start the book creation"
                               type="text"
                               value={storyUpdates}
-                              onBlur={() => setPrefChangesModal(false)}
                               onChange={(e) => setStoryUpdates(e.target.value)}
                             />
                             <button
                               className="p-[10px] rounded-lg bg-crayola-sky-blue"
-                              onClick={async () =>
-                                await createStory(storyUpdates)
-                              }
+                              onClick={async (event) => {
+                                event.stopPropagation();
+                                await createStory(storyUpdates);
+                              }}
                             >
-                              <Image
-                                src={SendIcon}
-                                alt={"send-icon"}
-                                onClick={async () =>
-                                  await createStory(storyUpdates)
-                                }
-                              />
+                              <Image src={SendIcon} alt={"send-icon"} />
                             </button>
                           </div>
                         )}
                       </div>
                       <button
-                        className={` p-2 text-white rounded-lg bg-dark-orange ${!prefChangesModal && "flex-1"
-                          }`}
+                        className={` p-2 text-white rounded-lg bg-dark-orange ${
+                          !prefChangesModal && "flex-1"
+                        }`}
                         onClick={() => (data.length > 0 ? toggleModal() : null)}
                       >
                         Generate pics
@@ -405,17 +490,17 @@ const Page = ({ params }) => {
                     </div>
                   ) : (
                     <div className="bg-white p-2 w-[100%] rounded-lg flex gap-2 justify-between">
-                      <div className="flex flex-1">
-                        <button
-                          className="w-full p-2 rounded-lg bg-crayola-sky-blue"
-                          onClick={() => setDownloadModal(true)}
-                        >
-                          Download ebook
-                        </button>
-                      </div>
                       <button
-                        className={` p-2 text-white rounded-lg bg-dark-orange ${!prefChangesModal && "flex-1"
-                          }`}
+                        className="flex-1 p-2 rounded-lg bg-crayola-sky-blue"
+                        onClick={() => setDownloadModal(true)}
+                      >
+                        Download ebook
+                      </button>
+
+                      <button
+                        className={`flex-1 p-2 text-white rounded-lg bg-dark-orange ${
+                          !prefChangesModal && "flex-1"
+                        }`}
                       >
                         Print the book
                       </button>
@@ -432,6 +517,8 @@ const Page = ({ params }) => {
         isModalOpen={isModalOpen}
         background="bg-black"
         width="400px"
+        padding="p-6"
+        id="genreModal"
       >
         <div className="flex flex-col items-center justify-center w-full gap-5">
           <Select
@@ -456,6 +543,8 @@ const Page = ({ params }) => {
         isModalOpen={downloadModal}
         background="bg-[#FF8E00CC]"
         width="60%"
+        padding="p-6"
+        id="downloadModal"
       >
         <Image
           src={Close}
@@ -493,6 +582,41 @@ const Page = ({ params }) => {
           </div>
         </div>
       </Modal>
+      {state.isAuthenticated !== true ? (
+        <Modal
+          toggleModal={() => setLoginModal(true)}
+          isModalOpen={loginModal}
+          background="bg-black"
+          width="30%"
+          padding="p-0"
+          id="loginModal"
+        >
+          <Login
+            callback={handleLoginCb}
+            signUp={() => {
+              setSignupModal(true);
+              setLoginModal(false);
+            }}
+          />
+        </Modal>
+      ) : null}
+      {state.isAuthenticated !== true ? (
+        <Modal
+          toggleModal={() => setSignupModal(true)}
+          isModalOpen={signupModal}
+          background="bg-black"
+          width="30%"
+          padding="p-0"
+          id="signupModal"
+        >
+          <Signup
+            callBack={() => {
+              setSignupModal(false);
+              setLoginModal(true);
+            }}
+          />
+        </Modal>
+      ) : null}
     </div>
   );
 };

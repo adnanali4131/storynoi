@@ -1,7 +1,15 @@
 "use client";
-const Modal = ({ children, isModalOpen, toggleModal, width, background }) => {
+const Modal = ({
+  children,
+  isModalOpen,
+  toggleModal,
+  width,
+  background,
+  padding,
+  id,
+}) => {
   const handleOverlayClick = (event) => {
-    if (event.target.id === "defaultModal") {
+    if (event.target.id === id) {
       toggleModal();
     }
   };
@@ -11,7 +19,7 @@ const Modal = ({ children, isModalOpen, toggleModal, width, background }) => {
       {/* Main modal */}
       {isModalOpen && (
         <div
-          id="defaultModal"
+          id={id}
           tabIndex="-1"
           aria-hidden="true"
           onClick={handleOverlayClick}
@@ -19,7 +27,7 @@ const Modal = ({ children, isModalOpen, toggleModal, width, background }) => {
         >
           <div className={`relative min-w-[300px]`} style={{ width: width }}>
             <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <div className="p-6 space-y-6">{children}</div>
+              <div className={`${padding ?? "p-6"} space-y-6`}>{children}</div>
             </div>
           </div>
         </div>

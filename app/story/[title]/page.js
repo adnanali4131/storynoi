@@ -16,7 +16,7 @@ import Header from "@/components/layout/Header";
 import SendIcon from "@/assets/stories/icons/send.svg";
 
 import * as animationData from "@/assets/stories/book-loader.json";
-import { SUMMARY } from "@/constants/index";
+import { SUMMARY, DISCUSSION } from "@/constants/index";
 import downloadImage from "@/assets/stories/download.svg";
 
 import Modal from "@/components/global/modal/Modal";
@@ -29,6 +29,8 @@ import Close from "@/assets/stories/icons/close.svg";
 import Login from "@/components/login/Login";
 import { AuthContext } from "@/components/contexts/Auth";
 import jwt_decode from "jwt-decode";
+import DiscussionsComponent from "@/components/landing/discussions";
+
 const selectList = [
   {
     id: 1,
@@ -351,53 +353,61 @@ const Page = ({ params }) => {
                   <div className="flex flex-col h-full px-5 py-2 overflow-auto content-container gap-9">
                     {data.length > 0 &&
                       !loading &&
-                      data.map(
-                        (el) =>
-                          el.heading !== SUMMARY && (
-                            <>
-                              <div
-                                key={el.heading}
-                                className="flex items-center gap-5 text-black bg-white shadow-sm rounded-xl"
-                              >
-                                <div className="w-full flex-1 h-[500px] flex overflow-hidden  justify-center items-center flex-col shadow-[10px 4px 12px 0px #0000001F]">
-                                  {el.image ? (
-                                    <Image
-                                      src={el.image}
-                                      alt={el.heading}
-                                      width={100}
-                                      height={100}
-                                      className="w-[100%]"
-                                    />
-                                  ) : (
-                                    <div className="flex items-center justify-center gap-4 flex-col w-full h-[100%]">
-                                      <Image
-                                        src={downloadImage}
-                                        alt="download"
-                                      />
-                                      {el.imageText.length > 0 ? (
-                                        <p className="text-lg leading-7 text-center ">
-                                          {el.imageText}
-                                        </p>
-                                      ) : null}
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="h-[500px] items-center p-4 flex justify-center flex-col">
-                                    {["Title", "Moral"].includes(el.heading) ? (
-                                      <h2 className="text-[24px] font-semibold">
-                                        {el.heading}
-                                      </h2>
+                      data.map((el) => {
+                        if (
+                          el.heading !== SUMMARY &&
+                          el.heading !== DISCUSSION
+                        ) {
+                          return (
+                            <div
+                              key={el.heading}
+                              className="flex items-center gap-5 text-black bg-white shadow-sm rounded-xl"
+                            >
+                              <div className="w-full flex-1 h-[500px] flex overflow-hidden  justify-center items-center flex-col shadow-[10px 4px 12px 0px #0000001F]">
+                                {el.image ? (
+                                  <Image
+                                    src={el.image}
+                                    alt={el.heading}
+                                    width={100}
+                                    height={100}
+                                    className="w-[100%]"
+                                  />
+                                ) : (
+                                  <div className="flex items-center justify-center gap-4 flex-col w-full h-[100%]">
+                                    <Image src={downloadImage} alt="download" />
+                                    {el.imageText.length > 0 ? (
+                                      <p className="text-lg leading-7 text-center ">
+                                        {el.imageText}
+                                      </p>
                                     ) : null}
-                                    <p className="text-lg leading-7 text-center">
-                                      {el.description}
-                                    </p>
                                   </div>
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <div className="h-[500px] items-center p-4 flex justify-center flex-col">
+                                  {["Title", "Moral"].includes(el.heading) ? (
+                                    <h2 className="text-[24px] font-semibold">
+                                      {el.heading}
+                                    </h2>
+                                  ) : null}
+                                  <p className="text-lg leading-7 text-center">
+                                    {el.description}
+                                  </p>
                                 </div>
                               </div>
-                            </>
-                          )
-                      )}
+                            </div>
+                          );
+                        }
+                      })}
+
+                    {data.find((item) => item.heading === DISCUSSION) && (
+                      <DiscussionsComponent
+                        discussion={data.find(
+                          (item) => item.heading === DISCUSSION
+                        )}
+                        imageUrls={data.map((story) => story.image)}
+                      />
+                    )}
                     {loading && !data.length && (
                       <div className="flex flex-col w-full h-[100%]">
                         <Lottie

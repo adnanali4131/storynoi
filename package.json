@@ -19,6 +19,7 @@
     "encoding": "^0.1.13",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.13",
+    "formik": "^2.4.3",
     "google-auth-library": "^9.0.0",
     "jsonwebtoken": "^9.0.1",
     "jwt-decode": "^3.1.2",
@@ -34,8 +35,11 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-lottie": "^1.2.3",
+    "react-slick": "^0.29.0",
+    "slick-carousel": "^1.8.1",
     "tailwindcss": "3.3.3",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "yup": "^1.2.0"
   },
   "devDependencies": {
     "prisma": "^5.1.1"

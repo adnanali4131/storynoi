@@ -6,6 +6,7 @@ import Hidden from "@/assets/auth/icons/hidden.svg";
 import User from "@/assets/auth/icons/user.svg";
 import Google from "@/assets/auth/icons/google.svg";
 import Show from "@/assets/auth/icons/show.svg";
+
 const Login = ({ width }) => {
   const [hidden, setHidden] = useState(true);
 

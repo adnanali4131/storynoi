@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
+import { useRouter } from 'next/navigation';
 import Image from "next/image";
 
 import overlay1 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-1.png";
@@ -19,9 +21,9 @@ import Signup from "@/components/signup/Signup";
 import Link from "next/link";
 
 const Page = () => {
+
   return (
     <div className="relative">
-
       <section className="relative overflow-hidden hero-section h-[100vh] bg-crayola-sky-blue">
         <Image
           src={overlay1}
@@ -115,7 +117,9 @@ const Page = () => {
             </div>
           </div>
           <div className="flex-1  ml-[280px] mt-[-50px]">
-            <Signup width="440px" />
+            <Signup
+              width="440px"
+            />
           </div>
         </div>
 

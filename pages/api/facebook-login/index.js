@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { PrismaClient } from '@prisma/client';
+import prisma from "@/db";
 import jwt from 'jsonwebtoken';
 
-const prisma = new PrismaClient();
 
 const FACEBOOK_APP_ID = process.env.FACEBOOK_ID;
 const FACEBOOK_APP_SECRET = process.env.FACEBOOK_SECRET;

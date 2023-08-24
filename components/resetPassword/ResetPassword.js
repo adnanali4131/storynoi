@@ -1,14 +1,39 @@
 "use client";
 import { useState } from "react";
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import reseticon from "@/assets/auth/forgot/reset.svg"
-import Lock from "@/assets/auth/icons/lock.svg";
 import Hidden from "@/assets/auth/icons/hidden.svg";
 import { useFormik } from "formik";
 import { resetPassSchema } from "@/assets/yup/schema";
 
 const ResetPassword = ({ width }) => {
+
+  const router = useSearchParams();
+  const navigator = useRouter()
+  const token = router.get("token");
   const [hidden, setHidden] = useState(true);
+
+  const resetPassword = async (password, token) => {
+    const newPassword = password
+    try {
+      const response = await fetch('api/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newPassword, token }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong!');
+      }
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -16,8 +41,13 @@ const ResetPassword = ({ width }) => {
       confirmPassword: '',
     },
     validationSchema: resetPassSchema,
-    onSubmit: (values) => {
-      console.log('Password:', values.password);
+    onSubmit: async (values) => {
+      try {
+        await resetPassword(values.password, token);
+        navigator.push("login")
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
     },
   });
 
@@ -94,14 +124,14 @@ const ResetPassword = ({ width }) => {
               ) : null}
             </div>
 
+          </div>
 
+          <div className="flex flex-col gap-5">
+            <button className="text-white bg-dark-orange rounded-xl text-[16px] my-4 p-3" >
+              Submit
+            </button>
           </div>
         </form>
-        <div className="flex flex-col gap-5">
-          <button className="text-white bg-dark-orange rounded-xl text-[16px] my-4 p-3" >
-            Submit
-          </button>
-        </div>
       </div>
     </div>
   );

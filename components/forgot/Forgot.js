@@ -7,13 +7,39 @@ import { emailSchema } from "@/assets/yup/schema";
 import { useFormik } from "formik";
 
 const Forgot = ({ width }) => {
+  const sendForgotPasswordRequest = async (email) => {
+    console.log("email==>", email)
+    try {
+      const response = await fetch('api/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong!');
+      }
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const formik = useFormik({
     initialValues: {
       email: '',
     },
     validationSchema: emailSchema,
-    onSubmit: (values) => {
-      console.log('Email:', values.email);
+    onSubmit: async (values) => {
+      console.log("values==>", values)
+      try {
+        const responseData = await sendForgotPasswordRequest(values.email);
+        console.log('Response:', responseData);
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
 
     },
   });

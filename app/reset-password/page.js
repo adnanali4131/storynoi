@@ -1,6 +1,5 @@
 import React from "react";
 import Image from "next/image";
-
 import overlay1 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay2 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay3 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-3.png";
@@ -15,6 +14,7 @@ import ResetPassword from "@/components/resetPassword/ResetPassword";
 
 
 const Page = () => {
+
   return (
     <div className="relative">
       <section className="relative overflow-hidden hero-section h-[100vh] bg-mustard">
@@ -86,3 +86,5 @@ const Page = () => {
 };
 
 export default Page;
+
+

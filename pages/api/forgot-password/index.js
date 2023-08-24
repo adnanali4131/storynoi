@@ -1,6 +1,7 @@
 import { sendEmail } from "@/aws/ses";
 import prisma from "@/db";
 import jwt from "jsonwebtoken";
+import { SUBJECT } from "@/constants";
 
 export default async function forgotPasswordHandler(req, res) {
   try {
@@ -21,7 +22,6 @@ export default async function forgotPasswordHandler(req, res) {
         expiresIn: "1h",
       });
 
-      const subject = "Reset Password";
       const htmlTemplate = `
               <p>Click on the link below to reset your password:</p>
               <a href="${`${process.env.RESET_URL}?token=${token}`}">Reset Password</a>
@@ -29,7 +29,7 @@ export default async function forgotPasswordHandler(req, res) {
 
       await sendEmail({
         recipientEmail: user.email,
-        subject: subject,
+        subject: SUBJECT,
         htmlTemplate: htmlTemplate
       });
 

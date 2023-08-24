@@ -1,8 +1,8 @@
 import authenticateJWT from "@/middleware";
 const { Configuration, OpenAIApi } = require("openai");
-import { PrismaClient } from "@prisma/client";
 import authenticationHelper from "@/lib/helper/authentication";
-const prisma = new PrismaClient();
+import prisma from "@/db";
+
 
 const config = new Configuration({
   apiKey: process.env.OPEN_AI_API_KEY,
@@ -39,8 +39,8 @@ const handler = async (req, res) => {
           : "No response from OpenAI";
       console.log(
         response.data.choices &&
-          response.data.choices[0] &&
-          response.data.choices[0].message.content
+        response.data.choices[0] &&
+        response.data.choices[0].message.content
       );
       let parsedData = JSON.parse(data);
       if (parsedData && parsedData.data) {

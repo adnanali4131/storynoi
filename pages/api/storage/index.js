@@ -1,7 +1,6 @@
 import client from "@/lib/storage/index";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { Prisma, PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import prisma from "@/db";
 export default async function handler(req, res) {
   const { heading, base64, id } = JSON.parse(req.body);
   const imageBuffer = Buffer.from(base64, "base64");

@@ -1,8 +1,5 @@
 import authenticateJWT from "@/middleware";
-
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "@/db";
 
 const handler = async (req, res) => {
   try {

@@ -7,22 +7,21 @@ const client = new OAuth2Client({
 });
 
 export default async function handler(req, res) {
-  if (req.method === "GET") {
-    const authUrl = client.generateAuthUrl({
-      access_type: "offline",
-      prompt: "consent",
-      response_type: "code",
-      scope: [
-        "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/userinfo.profile",
-      ],
-    });
-    return res.redirect(authUrl);
+  try {
+    if (req.method === "GET") {
+      const authUrl = client.generateAuthUrl({
+        access_type: "online",
+        prompt: "consent",
+        response_type: "code",
+        scope: [
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile",
+        ],
+      });
+
+      return res.redirect(authUrl);
+    }
+  } catch (err) {
+    res.status(400).json({ err });
   }
-
 }
-
-
-
-
-

@@ -9,6 +9,10 @@ import Show from "@/assets/auth/icons/show.svg";
 import LocalStorage from "@/lib/integration/localstorage";
 import jwt_decode from "jwt-decode";
 import { AuthContext } from "../contexts/Auth";
+// import { GoogleLogin } from "react-google-login";
+
+import { useGoogleLogin } from "@react-oauth/google";
+
 const Login = ({ width, callback, signUp }) => {
   const { state, dispatch } = useContext(AuthContext);
   const [email, setEmail] = useState("");
@@ -50,6 +54,53 @@ const Login = ({ width, callback, signUp }) => {
       }
     }
   };
+
+  const handleGoogleLogin = async () => {
+    await (
+      await fetch("/api/google-login", {
+        method: "GET",
+        mode: "no-cors",
+      })
+    ).json();
+    // if (res) {
+    // window.open(res.url, "_blank");
+    // }
+  };
+
+  // login with google
+  const responseGoogle_success = (response) => {
+    const { tokenObj, profileObj } = response;
+    console.log(response, "response");
+    // dispatch(
+    //   loginWithGoogle(
+    //     {
+    //       email: profileObj && profileObj.email,
+    //       name: profileObj && profileObj.name,
+    //       profile: profileObj && profileObj.imageUrl,
+    //       token: tokenObj && tokenObj.id_token,
+    //     },
+    //     pushToIndex
+    //   )
+    // );
+  };
+
+  const responseGoogle_error = (err) => {
+    console.log(err);
+  };
+
+  const googleLoginHandler = useGoogleLogin({
+    scope:
+      "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+    onSuccess: async (tokenResponse) => {
+      const res = await fetch(
+        `/api/callback?code=${tokenResponse.access_token}`
+      );
+
+      if (res) {
+        console.log(res, "callback api res");
+      }
+    },
+  });
 
   return (
     <div className="px-10 py-8 bg-white login rounded-xl" style={{ width }}>
@@ -106,7 +157,11 @@ const Login = ({ width, callback, signUp }) => {
             <p className="text-[16px] text-[#ABABAB]">or</p>
             <div className="h-[1px] w-[45%]  bg-[#ABABAB]"></div>
           </div>
-          <button className="bg-white flex gap-3 border justify-center items-center  rounded-xl text-[16px] p-3">
+
+          <button
+            className="bg-white flex gap-3 border justify-center items-center  rounded-xl text-[16px] p-3"
+            onClick={handleGoogleLogin}
+          >
             <Image src={Google} width={20} alt="google-icon" />{" "}
             <p className="tex-[16px] text-[#ABABAB]">Continue with Google</p>
           </button>

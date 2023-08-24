@@ -1,6 +1,6 @@
+"use client";
 import React from "react";
 import Image from "next/image";
-
 
 import overlay1 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay2 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-1.png";
@@ -21,7 +21,6 @@ import Login from "@/components/login/Login";
 const Page = () => {
   return (
     <div className="relative">
-
       <section className="relative overflow-hidden hero-section h-[100vh] bg-crayola-sky-blue">
         <Image
           src={overlay1}
@@ -68,7 +67,7 @@ const Page = () => {
       </section>
 
       <div className="absolute top-0 left-0 w-[100vw] h-[100vh] z-30 ">
-        <div className="py-10 custom_container mx-auto">
+        <div className="py-10 mx-auto custom_container">
           <div className="flex items-center justify-between">
             <div className="logo">
               <Link href={"/"}>
@@ -76,15 +75,20 @@ const Page = () => {
                 <Image src={Logo} alt="logo" width={100} />
               </Link>
             </div>
-
           </div>
         </div>
-        <div className=" flex justify-between items-center">
-          <div className="flex-1 justify-between items-center">
+        <div className="flex items-center justify-between ">
+          <div className="items-center justify-between flex-1">
             <div className="flex ml-[100px]">
               <div>
                 <div className="rounded-lg">
-                  <Image src={signup2} alt="Signup Image 2" width={320} height={320} className="rounded-lg" />
+                  <Image
+                    src={signup2}
+                    alt="Signup Image 2"
+                    width={320}
+                    height={320}
+                    className="rounded-lg"
+                  />
                 </div>
                 <div className="relative">
                   <div className="mt-[-25px] ml-[-19px] bg-white w-20 h-20 absolute top-0 left-0 transform rotate-45 rounded-lg"></div>
@@ -94,19 +98,37 @@ const Page = () => {
                 </div>
               </div>
               <div>
-                <div className="ml-4 my-6 mb-12 rounded-lg">
-                  <Image src={signup1} alt="Signup Image 1" width={160} height={160} className="rounded-lg" />
+                <div className="my-6 mb-12 ml-4 rounded-lg">
+                  <Image
+                    src={signup1}
+                    alt="Signup Image 1"
+                    width={160}
+                    height={160}
+                    className="rounded-lg"
+                  />
                 </div>
                 <div className="relative mt-[-40px] ml-[-14px]">
                   <div className=" bg-gray w-[250px] mt-3 h-[140px] rounded-lg ml-[-25px]">
-                    <div className="absolute bg-crayola-sky-blue mx-5 mt-4 py-3 px-4 rounded-lg">
+                    <div className="absolute px-4 py-3 mx-5 mt-4 rounded-lg bg-crayola-sky-blue">
                       <div className="flex">
-                        <Image src={wave} alt="Frame" width={10} height={10} /> <span className="text-[12px] ml-1"> I - “Hello! Share your Idea”</span>
+                        <Image src={wave} alt="Frame" width={10} height={10} />{" "}
+                        <span className="text-[12px] ml-1">
+                          {" "}
+                          I - “Hello! Share your Idea”
+                        </span>
                       </div>
                     </div>
-                    <div className="absolute mt-20 py-1 px-2 rounded-lg ml-12">
-                      <div className="bg-white py-4 px-2 rounded-lg flex">
-                        < Image src={vector} alt="Frame" width={10} height={10} /> <span className="text-[10px] ml-1">User - “Bella loves fairy- tales”</span>
+                    <div className="absolute px-2 py-1 mt-20 ml-12 rounded-lg">
+                      <div className="flex px-2 py-4 bg-white rounded-lg">
+                        <Image
+                          src={vector}
+                          alt="Frame"
+                          width={10}
+                          height={10}
+                        />{" "}
+                        <span className="text-[10px] ml-1">
+                          User - “Bella loves fairy- tales”
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -118,9 +140,8 @@ const Page = () => {
             <Login width="440px" />
           </div>
         </div>
-
       </div>
-    </div >
+    </div>
   );
 };
 

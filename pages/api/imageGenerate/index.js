@@ -50,7 +50,7 @@ export default async function handler(req, res) {
 
       const stabilityData = await stabilityResponse.json();
       const images = stabilityData;
-
+      console.log(images);
       return res.json({ images });
     } catch (error) {
       return res.json({

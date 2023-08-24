@@ -33,10 +33,10 @@ const Forgot = ({ width }) => {
           <div className="flex flex-col gap-5 mt-10">
             <div className="flex items-center justify-between  gap-3 px-4 overflow-hidden bg-white border rounded-xl custom-input">
               <div className="flex w-[90%] ">
-                <Image src={User} width={15} alt="user-icon" />
+                <Image src={User} width={15} alt="user-icon" className="mr-3" />
                 <input
                   type="email"
-                  placeholder="Email"
+                  placeholder={`Email`}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   value={formik.values.email}

@@ -64,7 +64,7 @@ const Page = () => {
       </section>
 
       <div className="absolute top-0 left-0 w-[100vw] h-[100vh] z-30 ">
-        <div className="py-10 custom_container mx-auto">
+        <div className="py-2 custom_container mx-auto">
           <div className="flex items-center justify-between">
             <div className="logo">
               <Link href={"/"}>

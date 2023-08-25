@@ -15,8 +15,8 @@ export default async function handler(req, res) {
           },
         ],
         cfg_scale: 7,
-        height: 512,
-        width: 512,
+        height: process.env.IMAGE_HEIGHT,
+        width: process.env.IMAGE_WIDTH,
         steps: 30,
         samples: 1,
       };

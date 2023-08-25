@@ -8,8 +8,6 @@ import Google from "@/assets/auth/icons/google.svg";
 import Show from "@/assets/auth/icons/show.svg";
 import { AuthContext } from "@/components/contexts/Auth";
 import saveToken from "@/lib/helper/savetoken";
-
-import { AuthContext } from "../contexts/Auth";
 import Link from "next/link";
 
 const Login = ({ width, callback, signUp }) => {

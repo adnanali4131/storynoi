@@ -7,9 +7,9 @@ import jwt_decode from "jwt-decode";
 import { AuthContext } from "@/components/contexts/Auth";
 import LocalStorage from "@/lib/integration/localstorage";
 const Header = () => {
-  const { dispatch } = useContext(AuthContext);
+  const { state, dispatch } = useContext(AuthContext);
+  const storage = new LocalStorage();
   useEffect(() => {
-    const storage = new LocalStorage();
     // Check for token
     if (storage.get("jwtToken")) {
       // Set auth token header auth
@@ -48,12 +48,25 @@ const Header = () => {
                 <Link href={"/signup"}>Idea</Link>
               </li>
               <li className="text-base font-medium">
-                <Link
-                  href={"/login"}
-                  className="py-2 border-2 border-black px-7 rounded-xl "
-                >
-                  Log In
-                </Link>
+                {state.isAuthenticated !== true ? (
+                  <Link
+                    href={"/login"}
+                    className="py-2 border-2 border-black px-7 rounded-xl "
+                  >
+                    Log In
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    className="py-2 border-2 border-black px-7 rounded-xl "
+                    onClick={() => {
+                      dispatch({ type: "LOGOUT" });
+                      storage.remove("jwtToken");
+                    }}
+                  >
+                    Logout
+                  </button>
+                )}
               </li>
             </ul>
           </div>

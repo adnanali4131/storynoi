@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 const client = new OAuth2Client({
   clientId: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: "http://localhost:3000/api/callback",
+  redirectUri: process.env.REDIRECT_URL,
 });
 
 export default async function handler(req, res) {

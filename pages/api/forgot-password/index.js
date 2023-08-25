@@ -21,26 +21,25 @@ export default async function forgotPasswordHandler(req, res) {
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
         expiresIn: "1h",
       });
-
+      const link = `http://${process.env.WEBSITE_DOMAIN}/reset-password?token=${token}`;
       const htmlTemplate = `
               <p>Click on the link below to reset your password:</p>
-              <a href="${`${process.env.RESET_URL}?token=${token}`}">Reset Password</a>
+              <a href="${link}">Reset Password</a>
             `;
 
       await sendEmail({
         recipientEmail: user.email,
         subject: SUBJECT,
-        htmlTemplate: htmlTemplate
+        htmlTemplate: htmlTemplate,
       });
 
-      return res.json({ message: "Reset password link has been sent to your email" });
+      return res.json({
+        message: "Reset password link has been sent to your email",
+      });
     }
-
   } catch (error) {
     return res
       .status(500)
       .json({ message: "Internal Server Error", error: error.message });
   }
 }
-
-

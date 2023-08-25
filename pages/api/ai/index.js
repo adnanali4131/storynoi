@@ -15,7 +15,7 @@ const openAi = new OpenAIApi(config);
 const handler = async (req, res) => {
   try {
     if (req.method === "POST") {
-      const { messages, id } = JSONreq.body;
+      const { messages, id } = JSON.parse(req.body);
       let systemMessage = [
         {
           role: "system",

@@ -1,8 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/db";
 
-const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
   if (req.method === "POST") {

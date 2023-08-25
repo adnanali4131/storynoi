@@ -1,8 +1,9 @@
 import authenticateJWT from "@/middleware";
 const { Configuration, OpenAIApi } = require("openai");
-import { PrismaClient } from "@prisma/client";
 import authenticationHelper from "@/lib/helper/authentication";
-const prisma = new PrismaClient();
+import prisma from "@/db";
+import isEmpty from "@/lib/helper/isEmpty";
+
 
 const config = new Configuration({
   apiKey: process.env.OPEN_AI_API_KEY,
@@ -14,7 +15,9 @@ const openAi = new OpenAIApi(config);
 const handler = async (req, res) => {
   try {
     if (req.method === "POST") {
+      // const { messages, id } = req.body;
       const { messages, id } = JSON.parse(req.body);
+
       let systemMessage = [
         {
           role: "system",
@@ -37,11 +40,7 @@ const handler = async (req, res) => {
         response.data.choices && response.data.choices[0]
           ? response.data.choices[0].message.content
           : "No response from OpenAI";
-      console.log(
-        response.data.choices &&
-          response.data.choices[0] &&
-          response.data.choices[0].message.content
-      );
+
       let parsedData = JSON.parse(data);
       if (parsedData && parsedData.data) {
         parsedData = parsedData.data;
@@ -51,7 +50,7 @@ const handler = async (req, res) => {
         parsedData && parsedData.find((item) => item.heading === "Title");
       const title = titleObj ? titleObj.description : null;
       let storyId = id;
-      let user = authenticationHelper(req);
+      let user = await authenticationHelper(req);
 
       let story;
       if (!user && id === "null" && id === null) {
@@ -61,12 +60,13 @@ const handler = async (req, res) => {
           imageUrl: [],
         };
       }
-      if ((title && Boolean(user)) || (title && id !== "null" && id !== null)) {
+
+      if ((title && !isEmpty(user)) || (title && !isEmpty(id))) {
         if (!id) {
           story = await prisma.story.create({
             data: {
               title: title,
-              userId: req.user.userId,
+              userId: user.id,
               userPrompt: title,
               imageUrl: [],
             },

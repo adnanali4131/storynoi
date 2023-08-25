@@ -1,5 +1,6 @@
 import { OAuth2Client } from "google-auth-library";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/db";
+
 import jwt from "jsonwebtoken";
 
 const client = new OAuth2Client({
@@ -7,8 +8,6 @@ const client = new OAuth2Client({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   redirectUri: "http://localhost:3000/api/callback",
 });
-
-const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
   if (req.method === "GET") {

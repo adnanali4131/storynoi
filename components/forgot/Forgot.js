@@ -2,25 +2,28 @@
 
 import Image from "next/image";
 import User from "@/assets/auth/icons/user.svg";
-import forgotIcon from "@/assets/auth/forgot/forgotlock.svg"
+import forgotIcon from "@/assets/auth/forgot/forgotlock.svg";
 import { emailSchema } from "@/assets/yup/schema";
 import { useFormik } from "formik";
+import { useRouter } from "next/navigation";
 
 const Forgot = ({ width }) => {
+  const router = useRouter();
   const sendForgotPasswordRequest = async (email) => {
-    console.log("email==>", email)
+    console.log("email==>", email);
     try {
-      const response = await fetch('api/forgot-password', {
-        method: 'POST',
+      const response = await fetch("api/forgot-password", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email }),
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || 'Something went wrong!');
+        throw new Error(data.message || "Something went wrong!");
       }
+      router.push("/");
       return data;
     } catch (error) {
       throw error;
@@ -29,22 +32,26 @@ const Forgot = ({ width }) => {
 
   const formik = useFormik({
     initialValues: {
-      email: '',
+      email: "",
     },
     validationSchema: emailSchema,
     onSubmit: async (values) => {
-      console.log("values==>", values)
+      console.log("values==>", values);
       try {
         const responseData = await sendForgotPasswordRequest(values.email);
-        console.log('Response:', responseData);
+        console.log("Response:", responseData);
+        if (responseData) {
+        }
       } catch (error) {
-        console.error('Error:', error.message);
+        console.error("Error:", error.message);
       }
-
     },
   });
   return (
-    <div className="relative px-10 py-12 bg-white  rounded-xl" style={{ width }}>
+    <div
+      className="relative px-10 py-12 bg-white  rounded-xl"
+      style={{ width }}
+    >
       <div className="text-[30px] ">
         <span className="flex items-center my-6 justify-center font-medium">
           <Image src={forgotIcon} width={140} alt="forgot icon" />
@@ -53,7 +60,10 @@ const Forgot = ({ width }) => {
           <h1 className="my-[10px] font-medium">Forgot Password</h1>
         </span>
         <span className="flex items-center justify-center">
-          <p className="text-[14px]">Don’t worry we got you covered. Enter the email <br></br> address associated with this account.</p>
+          <p className="text-[14px]">
+            Don’t worry we got you covered. Enter the email <br></br> address
+            associated with this account.
+          </p>
         </span>
         <form onSubmit={formik.handleSubmit}>
           <div className="flex flex-col gap-5 mt-10">
@@ -77,7 +87,10 @@ const Forgot = ({ width }) => {
                 {formik.errors.email}
               </div>
             ) : null}
-            <button type="submit" className="text-white bg-dark-orange rounded-xl text-[16px] p-3 mt-4">
+            <button
+              type="submit"
+              className="text-white bg-dark-orange rounded-xl text-[16px] p-3 mt-4"
+            >
               Submit
             </button>
           </div>

@@ -1,22 +1,23 @@
 "use client";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import Image from "next/image";
 import Lock from "@/assets/auth/icons/lock.svg";
 import Hidden from "@/assets/auth/icons/hidden.svg";
 import User from "@/assets/auth/icons/user.svg";
 import Google from "@/assets/auth/icons/google.svg";
 import Show from "@/assets/auth/icons/show.svg";
-import LocalStorage from "@/lib/integration/localstorage";
-import jwt_decode from "jwt-decode";
+import { AuthContext } from "@/components/contexts/Auth";
+import saveToken from "@/lib/helper/savetoken";
+
 import { AuthContext } from "../contexts/Auth";
 import Link from "next/link";
 
 const Login = ({ width, callback, signUp }) => {
-  const { state, dispatch } = useContext(AuthContext);
+  const { dispatch } = useContext(AuthContext);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [hidden, setHidden] = useState(true);
-  const storage = new LocalStorage();
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -31,27 +32,29 @@ const Login = ({ width, callback, signUp }) => {
     ).json();
 
     if (res) {
-      storage.set("jwtToken", res.token);
-
-      // Check for token
-      if (storage.get("jwtToken")) {
-        // Set auth token header auth
-        // setAuthToken(localStorage.jwtToken);
-        // Decode token and get user info and exp
-        const decoded = jwt_decode(storage.get("jwtToken"));
-        // Set user and isAuthenticated
-        dispatch({ type: "SET_CURRENT_USER", payload: decoded });
-
-        // Check for expired token
-        const currentTime = Date.now() / 1000;
-        if (decoded.exp < currentTime) {
-          dispatch({ type: "USER_LOGOUT" });
-        } else {
-          if (callback) await callback();
-        }
-      }
+      saveToken(res.token, dispatch);
+      if (callback) callback();
     }
   };
+
+  const handleGoogleLogin = async () => {
+    const res = await (
+      await fetch("/api/google-login", {
+        method: "GET",
+      })
+    ).json();
+    if (res) {
+      window.open(res.url, "_blank");
+    }
+  };
+  useEffect(() => {
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "GoogleAuthSuccess") {
+        saveToken(event.data.data.token, dispatch);
+        if (callback) callback();
+      }
+    });
+  }, []);
 
   return (
     <div className="px-10 py-8 bg-white login rounded-xl" style={{ width }}>
@@ -111,10 +114,15 @@ const Login = ({ width, callback, signUp }) => {
             <p className="text-[16px] text-[#ABABAB]">or</p>
             <div className="h-[1px] w-[45%]  bg-[#ABABAB]"></div>
           </div>
-          <button className="bg-white flex gap-3 border justify-center items-center  rounded-xl text-[16px] p-3">
+          {/* <form method="GET" action={"/api/google-login"}> */}
+          <button
+            className="bg-white flex gap-3 border justify-center items-center  rounded-xl text-[16px] p-3"
+            onClick={handleGoogleLogin}
+          >
             <Image src={Google} width={20} alt="google-icon" />{" "}
             <p className="tex-[16px] text-[#ABABAB]">Continue with Google</p>
           </button>
+          {/* </form> */}
           <div className="flex justify-center mt-20">
             <p className="text-[15px]">
               Don’t have an account?{" "}

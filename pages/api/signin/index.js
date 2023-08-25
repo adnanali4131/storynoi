@@ -16,9 +16,17 @@ export default async function handler(req, res) {
       if (!user || !(await bcrypt.compare(password, user.password))) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-        expiresIn: "30d",
-      });
+      const token = jwt.sign(
+        {
+          userId: user.id,
+          email: user.email,
+          userName: user.firstName + " " + user.lastName,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "7d",
+        }
+      );
       return res.json({ token });
     }
   } catch (error) {

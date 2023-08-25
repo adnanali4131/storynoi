@@ -17,6 +17,7 @@
     "aws-sdk": "^2.1443.0",
     "axios": "^1.4.0",
     "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
     "encoding": "^0.1.13",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.13",

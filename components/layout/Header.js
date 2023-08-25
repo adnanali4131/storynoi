@@ -45,7 +45,7 @@ const Header = () => {
                 <Link href={"/"}>Why StoryNoi</Link>
               </li>
               <li className="text-base font-medium">
-                <Link href={"/"}>Idea</Link>
+                <Link href={"/signup"}>Idea</Link>
               </li>
               <li className="text-base font-medium">
                 <Link

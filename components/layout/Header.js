@@ -45,11 +45,11 @@ const Header = () => {
                 <Link href={"/"}>Why StoryNoi</Link>
               </li>
               <li className="text-base font-medium">
-                <Link href={"/"}>Idea</Link>
+                <Link href={"/signup"}>Idea</Link>
               </li>
               <li className="text-base font-medium">
                 <Link
-                  href={"/"}
+                  href={"/login"}
                   className="py-2 border-2 border-black px-7 rounded-xl "
                 >
                   Log In

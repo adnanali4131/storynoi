@@ -17,7 +17,6 @@ export default async function handler(req, res) {
     if (!code) {
       return res.json({ error: "No code provided" });
     }
-    console.log(code);
     const { tokens } = await client.getToken(code);
     const { payload } = await client.verifyIdToken({
       idToken: tokens.id_token,
@@ -28,35 +27,44 @@ export default async function handler(req, res) {
     const lastName = payload.family_name;
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: {
         email: email,
       },
     });
 
-    let userId;
-
-    if (!existingUser) {
-      const newUser = await prisma.user.create({
+    if (!user) {
+      user = await prisma.user.create({
         data: {
           firstName: firstName,
           lastName: lastName,
           email: email,
         },
       });
-      userId = newUser.id;
-    } else {
-      userId = existingUser.id;
     }
 
     const token = jwt.sign(
-      { userId: userId, email: email },
+      {
+        userId: user.id,
+        email: user.email,
+        userName: user.firstName + " " + lastName,
+      },
       process.env.JWT_SECRET,
       {
         expiresIn: "30d",
       }
     );
 
-    return res.json({ token, email, firstName, lastName });
+    // return res.json({ token, email, firstName, lastName });
+    // Close the current tab/window
+    const data = JSON.stringify({ token, email, firstName, lastName });
+    const script = `
+  <script>
+    window.opener.postMessage({type:'GoogleAuthSuccess', data:${data}}, '*');
+    window.close();
+  </script>
+`;
+
+    res.send(script);
   }
 }

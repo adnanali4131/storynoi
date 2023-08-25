@@ -175,6 +175,7 @@ const Page = ({ params }) => {
   const fetchImages = async (storyData) => {
     const stories = [...storyData];
     const length = state.isAuthenticated ? storyData?.length : 1;
+    console.log(length, "length");
     stories.forEach((story, index) => {
       story.imageText = "Generating illustration...";
     });
@@ -211,7 +212,7 @@ const Page = ({ params }) => {
               updateImageUrl
             );
             setData([...stories]);
-            setLoginModal(true);
+            if (!state.isAuthenticated) setLoginModal(true);
             if (
               res.story &&
               res.story.imageUrl &&
@@ -611,6 +612,10 @@ const Page = ({ params }) => {
         >
           <Signup
             callBack={() => {
+              handleLoginCb();
+              setSignupModal(false);
+            }}
+            login={() => {
               setSignupModal(false);
               setLoginModal(true);
             }}

@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import Image from "next/image";
-
+import { useRouter, redirect } from "next/navigation";
 import overlay1 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay2 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-1.png";
 import overlay3 from "@/assets/landing/creative-vibrant-grunge-watercolor-background-3.png";
@@ -17,8 +17,33 @@ import frame from "@/assets/auth/signup/Frame.svg";
 import overlay5 from "@/assets/auth/signup/lower-cushions.svg";
 import Link from "next/link";
 import Login from "@/components/login/Login";
-
+import LocalStorage from "@/lib/integration/localstorage";
+import { AuthContext } from "@/components/contexts/Auth";
+import jwt_decode from "jwt-decode";
 const Page = () => {
+  const router = useRouter();
+  const { state, dispatch } = useContext(AuthContext);
+  if (state.isAuthenticated) {
+    return redirect("/");
+  }
+  const storage = new LocalStorage();
+  useEffect(() => {
+    // Check for token
+    if (storage.get("jwtToken")) {
+      // Set auth token header auth
+      // setAuthToken(localStorage.jwtToken);
+      // Decode token and get user info and exp
+      const decoded = jwt_decode(storage.get("jwtToken"));
+      // Set user and isAuthenticated
+      dispatch({ type: "SET_CURRENT_USER", payload: decoded });
+
+      // Check for expired token
+      const currentTime = Date.now() / 1000;
+      if (decoded.exp < currentTime) {
+        dispatch({ type: "USER_LOGOUT" });
+      }
+    }
+  }, [dispatch]);
   return (
     <div className="relative">
       <section className="relative overflow-hidden hero-section h-[100vh] bg-crayola-sky-blue">
@@ -137,7 +162,7 @@ const Page = () => {
             </div>
           </div>
           <div className="flex-1  ml-[280px] mt-[-50px]">
-            <Login width="440px" />
+            <Login width="440px" signUp={() => router.push("/signup")} />
           </div>
         </div>
       </div>

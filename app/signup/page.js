@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { useRouter } from 'next/navigation';
+import React, { useContext, useEffect } from "react";
+import { redirect } from "next/navigation";
 import Image from "next/image";
 
 import overlay1 from "@/assets/stories/creative-vibrant-grunge-watercolor-background-1.png";
@@ -19,9 +19,33 @@ import frame from "@/assets/auth/signup/Frame.svg";
 
 import Signup from "@/components/signup/Signup";
 import Link from "next/link";
-
+import { AuthContext } from "@/components/contexts/Auth";
+import LocalStorage from "@/lib/integration/localstorage";
+import jwt_decode from "jwt-decode";
 const Page = () => {
+  const { state, dispatch } = useContext(AuthContext);
+  if (state.isAuthenticated) {
+    console.log(state.user);
+    return redirect("/");
+  }
+  useEffect(() => {
+    const storage = new LocalStorage();
+    // Check for token
+    if (storage.get("jwtToken")) {
+      // Set auth token header auth
+      // setAuthToken(localStorage.jwtToken);
+      // Decode token and get user info and exp
+      const decoded = jwt_decode(storage.get("jwtToken"));
+      // Set user and isAuthenticated
+      dispatch({ type: "SET_CURRENT_USER", payload: decoded });
 
+      // Check for expired token
+      const currentTime = Date.now() / 1000;
+      if (decoded.exp < currentTime) {
+        dispatch({ type: "USER_LOGOUT" });
+      }
+    }
+  }, [dispatch]);
   return (
     <div className="relative">
       <section className="relative overflow-hidden hero-section h-[100vh] bg-crayola-sky-blue">
@@ -78,7 +102,6 @@ const Page = () => {
                 <Image src={Logo} alt="logo" width={100} />
               </Link>
             </div>
-
           </div>
         </div>
         <div className=" flex justify-between items-center">
@@ -86,7 +109,13 @@ const Page = () => {
             <div className="flex ml-[100px]">
               <div>
                 <div className="rounded-lg">
-                  <Image src={signup2} alt="Signup Image 2" width={320} height={320} className="rounded-lg" />
+                  <Image
+                    src={signup2}
+                    alt="Signup Image 2"
+                    width={320}
+                    height={320}
+                    className="rounded-lg"
+                  />
                 </div>
                 <div className="relative">
                   <div className="mt-[-25px] ml-[-19px] bg-white w-20 h-20 absolute top-0 left-0 transform rotate-45 rounded-lg"></div>
@@ -97,18 +126,36 @@ const Page = () => {
               </div>
               <div>
                 <div className="ml-4 my-6 mb-12 rounded-lg">
-                  <Image src={signup1} alt="Signup Image 1" width={160} height={160} className="rounded-lg" />
+                  <Image
+                    src={signup1}
+                    alt="Signup Image 1"
+                    width={160}
+                    height={160}
+                    className="rounded-lg"
+                  />
                 </div>
                 <div className="relative mt-[-40px] ml-[-14px]">
                   <div className=" bg-gray w-[250px] mt-3 h-[140px] rounded-lg ml-[-25px]">
                     <div className="absolute bg-crayola-sky-blue mx-5 mt-4 py-3 px-4 rounded-lg">
                       <div className="flex">
-                        <Image src={wave} alt="Frame" width={10} height={10} /> <span className="text-[12px] ml-1"> I - “Hello! Share your Idea”</span>
+                        <Image src={wave} alt="Frame" width={10} height={10} />{" "}
+                        <span className="text-[12px] ml-1">
+                          {" "}
+                          I - “Hello! Share your Idea”
+                        </span>
                       </div>
                     </div>
                     <div className="absolute mt-20 py-1 px-2 rounded-lg ml-12">
                       <div className="bg-white py-4 px-2 rounded-lg flex">
-                        < Image src={vector} alt="Frame" width={10} height={10} /> <span className="text-[10px] ml-1">User - “Bella loves fairy- tales”</span>
+                        <Image
+                          src={vector}
+                          alt="Frame"
+                          width={10}
+                          height={10}
+                        />{" "}
+                        <span className="text-[10px] ml-1">
+                          User - “Bella loves fairy- tales”
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -117,14 +164,11 @@ const Page = () => {
             </div>
           </div>
           <div className="flex-1  ml-[280px] mt-[-50px]">
-            <Signup
-              width="440px"
-            />
+            <Signup width="440px" />
           </div>
         </div>
-
       </div>
-    </div >
+    </div>
   );
 };
 

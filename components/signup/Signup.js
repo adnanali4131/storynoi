@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import Image from "next/image";
 import Hidden from "@/assets/auth/icons/hidden.svg";
@@ -7,8 +7,8 @@ import Google from "@/assets/auth/icons/google.svg";
 import Show from "@/assets/auth/icons/show.svg";
 import { ValidationSchema } from "@/assets/yup/schema";
 import { useRouter } from "next/navigation";
-
-const Signup = ({ width, callBack }) => {
+import saveToken from "@/lib/helper/savetoken";
+const Signup = ({ width, callBack, login }) => {
   const router = useRouter();
   const [hidden, setHidden] = useState(true);
 
@@ -23,8 +23,8 @@ const Signup = ({ width, callBack }) => {
 
     const data = await response.json();
     if (data.message) {
-      if (callBack) {
-        callBack();
+      if (login) {
+        login();
       } else router.push("login");
     } else if (data.error) {
       alert(data.error);
@@ -43,7 +43,25 @@ const Signup = ({ width, callBack }) => {
       onFormSubmit(values);
     },
   });
-
+  const handleGoogleLogin = async () => {
+    const res = await (
+      await fetch("/api/google-login", {
+        method: "GET",
+      })
+    ).json();
+    if (res) {
+      window.open(res.url, "_blank");
+    }
+  };
+  useEffect(() => {
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "GoogleAuthSuccess") {
+        saveToken(event.data.data.token, dispatch);
+        if (callBack) callBack();
+        else router.push("/");
+      }
+    });
+  }, []);
   return (
     <div className="px-10 py-8 bg-white login rounded-xl" style={{ width }}>
       <div className="text-[30px] font-medium">
@@ -140,22 +158,33 @@ const Signup = ({ width, callBack }) => {
           >
             Create Account
           </button>
-          <div className="flex items-center justify-between">
-            <div className="h-[1px] w-[45%] bg-[#ABABAB]"></div>
-            <p className="text-[16px] text-[#ABABAB]">or</p>
-            <div className="h-[1px] w-[45%]  bg-[#ABABAB]"></div>
-          </div>
-          <button className="bg-white flex gap-3 border justify-center items-center  rounded-xl text-[16px] p-3">
-            <Image src={Google} width={20} alt="google-icon" />{" "}
-            <p className="tex-[16px] text-[#ABABAB]">Continue with Google</p>
-          </button>
-          <div className="flex justify-center mt-10">
-            <p className="text-[15px]">
-              Already have an account?{" "}
-              <span className="text-dark-orange">Login</span>{" "}
-            </p>
-          </div>
         </form>
+        <div className="flex items-center justify-between">
+          <div className="h-[1px] w-[45%] bg-[#ABABAB]"></div>
+          <p className="text-[16px] text-[#ABABAB]">or</p>
+          <div className="h-[1px] w-[45%]  bg-[#ABABAB]"></div>
+        </div>
+        <button
+          className="bg-white flex gap-3 border justify-center items-center  rounded-xl text-[16px] p-3"
+          onClick={handleGoogleLogin}
+        >
+          <Image src={Google} width={20} alt="google-icon" />{" "}
+          <p className="tex-[16px] text-[#ABABAB]">Continue with Google</p>
+        </button>
+        <div className="flex justify-center mt-10">
+          <p className="text-[15px]">
+            Already have an account?{" "}
+            <span
+              className="text-dark-orange"
+              onClick={() => {
+                if (login) login();
+                else router.push("/login");
+              }}
+            >
+              Login
+            </span>{" "}
+          </p>
+        </div>
       </div>
     </div>
   );

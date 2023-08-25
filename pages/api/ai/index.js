@@ -4,7 +4,6 @@ import authenticationHelper from "@/lib/helper/authentication";
 import prisma from "@/db";
 import isEmpty from "@/lib/helper/isEmpty";
 
-
 const config = new Configuration({
   apiKey: process.env.OPEN_AI_API_KEY,
   organization: process.env.OPEN_AI_ORG,
@@ -62,7 +61,8 @@ const handler = async (req, res) => {
       }
 
       if ((title && !isEmpty(user)) || (title && !isEmpty(id))) {
-        if (!id) {
+        // console.log(Null)
+        if (isEmpty(id)) {
           story = await prisma.story.create({
             data: {
               title: title,

@@ -49,7 +49,7 @@ const Header = () => {
               </li>
               <li className="text-base font-medium">
                 <Link
-                  href={"/"}
+                  href={"/login"}
                   className="py-2 border-2 border-black px-7 rounded-xl "
                 >
                   Log In

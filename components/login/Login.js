@@ -9,6 +9,8 @@ import Show from "@/assets/auth/icons/show.svg";
 import LocalStorage from "@/lib/integration/localstorage";
 import jwt_decode from "jwt-decode";
 import { AuthContext } from "../contexts/Auth";
+import Link from "next/link";
+
 const Login = ({ width, callback, signUp }) => {
   const { state, dispatch } = useContext(AuthContext);
   const [email, setEmail] = useState("");
@@ -91,9 +93,12 @@ const Login = ({ width, callback, signUp }) => {
             />
           </div>
           <div className="w-full">
-            <p className="float-right text-[16px] text-dark-orange">
+            <Link
+              href={"/forgot-password"}
+              className="float-right text-[16px] text-dark-orange"
+            >
               Forgot Password?
-            </p>
+            </Link>
           </div>
           <button
             className="text-white bg-dark-orange rounded-xl text-[16px] p-3"

@@ -40,10 +40,10 @@ const Page = () => {
       // Check for expired token
       const currentTime = Date.now() / 1000;
       if (decoded.exp < currentTime) {
-        dispatch({ type: "USER_LOGOUT" });
+        dispatch({ type: "LOGOUT" });
       }
     }
-  }, [dispatch]);
+  }, []);
   return (
     <div className="relative">
       <section className="relative overflow-hidden hero-section h-[100vh] bg-crayola-sky-blue">

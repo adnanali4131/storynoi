@@ -15,7 +15,9 @@ const openAi = new OpenAIApi(config);
 const handler = async (req, res) => {
   try {
     if (req.method === "POST") {
+      // const { messages, id } = req.body;
       const { messages, id } = JSON.parse(req.body);
+
       let systemMessage = [
         {
           role: "system",
@@ -64,7 +66,7 @@ const handler = async (req, res) => {
           story = await prisma.story.create({
             data: {
               title: title,
-              userId: req.user.userId,
+              userId: user.id,
               userPrompt: title,
               imageUrl: [],
             },

@@ -6,8 +6,6 @@ export default async function resetPasswordHandler(req, res) {
   try {
     if (req.method === "POST") {
       const { token, newPassword } = req.body;
-      console.log("New Password:", newPassword);
-
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       const user = await prisma.user.findUnique({
